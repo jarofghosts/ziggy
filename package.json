@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "irc bot with plugin support",
   "main": "index.js",
+  "dependencies": {
+    "irc": "*"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
