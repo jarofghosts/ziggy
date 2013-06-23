@@ -1,3 +1,7 @@
+var util = require('util'),
+    EventEmitter = require('events').EventEmitter,
+    irc = require('irc');
+
 function Ziggy() {
 }
 
