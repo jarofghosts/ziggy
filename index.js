@@ -17,6 +17,10 @@ function massExecute(ziggy, command, items, callback) {
 
 }
 
+function lookupUser(ziggy, nickname) {
+  return ziggy.settings.users[nickname];
+}
+
 function Ziggy(settings) {
 
   this.settings = settings;
@@ -26,7 +30,20 @@ function Ziggy(settings) {
                                  realName: 'Ziggy',
                                  secure: settings.secure });
 
-  this.client.addListener();
+  this.client.on('registered', function () {
+    this.emit('ready');
+  });
+  this.client.on('names', function (channel, nicks) {
+    
+  });
+  this.client.on('join', function (channel, nick, message) {
+    if (nick === this.settings.nickname) {
+      this.emit('ziggyjoin', channel, message);
+    } else {
+      nick = lookupUser(this, nick) || { nick: nick };
+      this.emit('join', channel, nick, message);
+    }
+  }.bind(this));
 }
 
 Ziggy.prototype.part = function (channels, callback) {
@@ -65,7 +82,7 @@ function start(options) {
   settings.nickname = options.nickname || 'Ziggy';
   settings.plugins = options.plugins || [];
   settings.password = options.password || '';
-  settings.groups = options.groups || {};
+  settings.users = options.users || {};
   settings.secure = options.secure;
 
   return new Ziggy(settings);
