@@ -209,6 +209,9 @@ function Ziggy(settings) {
       this.emit('join', channel, user, message);
     }
   }.bind(this));
+
+  return this;
+
 }
 
 Ziggy.prototype.part = function (channels, callback) {
