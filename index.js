@@ -91,8 +91,32 @@ function Ziggy(settings) {
       this.emit('part', user, channel, reason);
     }
   });
+  this.client.on('quit', function (nick, reason, channels, message) {
+    var user = lookupUser(this, nick),
+        i = 0,
+        l = channels.length;
+
+    for (; i < l; ++i) {
+      if (this.settings.channels[channels[i]] && this.settings.channels[channels[i]][nick]) {
+        delete this.settings.channels[channel[i]][nick];
+      }
+    }
+    this.emit('quit', user, reason);
+
+  });
+  this.client.on('kick', function (channel, nick, by, reason) {
+    var kicked = userLookup(this, nick),
+        kicker = userLookup(this, by);
+
+    if (this.settings.channels[channel][nick]) {
+      delete this.settings.channels[channel][nick];
+    }
+
+    this.emit('kick', kicked, kicker, channel, reason);
+  });
   this.client.on('invite', function (channel, from, message) {
-    
+    var user = lookupUser(this, from);
+    this.emit('invite', channel, user);
   });
   this.client.on('join', function (channel, nick, message) {
     if (nick === this.settings.nickname) {
