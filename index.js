@@ -1,6 +1,21 @@
 var util = require('util'),
     EventEmitter = require('events').EventEmitter,
-    irc = require('irc');
+    irc = require('irc'),
+    noop = function () {};
+
+function massExecute(ziggy, command, items, callback) {
+
+  callback = callback || noop;
+
+  var i = 0,
+      l = items.length;
+
+  for (; i < l; ++i) {
+    if (i !== l - 1) { callback = noop; }
+    this[command](items[i], callback);
+  }
+
+}
 
 function Ziggy(settings) {
 
@@ -14,27 +29,35 @@ function Ziggy(settings) {
   this.client.addListener();
 }
 
-Ziggy.prototype.part = function (channels) {
+Ziggy.prototype.part = function (channels, callback) {
+
+  callback = callback || noop;
+
   if (channels instanceof Array) {
-    channels.forEach(channel) { this.part(channel); }.bind(this));
+    massExecute(this, 'part', channels, callback);
     return;
   }
 
-  this.client.part(channels);
+  this.client.part(channels, callback);
+
 };
 
-Ziggy.prototype.join = function (channels) {
+Ziggy.prototype.join = function (channels, callback) {
+
+  callback = callback || noop;
+
   if (channels instanceof Array) {
-    channels.forEach(channel) { this.join(channel); }.bind(this));
+    massExecute(this, 'join', channels, callback);
     return;
   }
 
-  this.client.join(channels);
+  this.client.join(channels, callback);
 };
 
-Ziggy.prototype.say = function (target, 
+Ziggy.prototype.say = this.client.say;
 
 function start(options) {
+  
   var settings = {};
 
   settings.server = options.server || 'irc.freenode.org';
@@ -46,6 +69,7 @@ function start(options) {
   settings.secure = options.secure;
 
   return new Ziggy(settings);
+
 }
 
 util.inherits(Ziggy, EventEmitter);
