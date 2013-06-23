@@ -73,6 +73,68 @@ function Ziggy(settings) {
   this.client.on('registered', function () {
     this.emit('ready');
   });
+
+  this.client.on('nick', function (oldnick, newnick, channels) {
+    if (this.settings.users[oldnick]) {
+      this.settings.users[newnick] = Object.create(this.settings.users[oldnick]);
+      delete this.settings.users[oldnick];
+    }
+    var i = 0,
+        l = channels.length;
+
+    for (; i < l; ++i) {
+      this.settings.channels[channels[i]].users[newnick] = Object.create(this.settings.channels[channels[i]].users[oldnick]);
+      delete this.settings.channels[channels[i]].users[oldnick];
+    }
+
+    this.emit('nick', oldnick, lookupUser(this, newnick), channels);
+
+  }.bind(this));
+
+  this.client.on('+mode', function (channel, by, mode, argument) { 
+    var setBy = userLookup(this, by);
+    if (mode === 'o' || mode === 'v') {
+      var currentLevel = this.settings.channels[channel].users[argument].shared.level;
+      if (currentLevel !== '@') {
+
+        var userMode = '';
+
+        if (mode == 'o') {
+          this.emit('op', channel, setBy, userLookup(this, argument));
+          userMode = '@';
+        } else {
+          this.emit('voice', channel, setBy, userLookup(this, argument));
+          userMode = '+';
+        }
+        
+        this.settings.channels[channel].users[argument].shared.level = userMode;
+      }
+    } else {
+      this.emit('mode', channel, setBy, '+' + mode, argument);
+    }
+  }.bind(this));
+  this.client.on('-mode', function (channel, by, mode, argument) { 
+    var setBy = userLookup(this, by);
+    if (mode === 'o' || mode === 'v') {
+      var currentLevel = this.settings.channels[channel].users[argument].shared.level;
+      if (currentLevel !== '') {
+        
+        var userMode = '';
+
+        if (mode == 'o') {
+          this.emit('deop', channel, setBy, userLookup(this, argument));
+        } else {
+          userMode = currentLevel == '@' ? '@' : '';
+          this.emit('devoice', channel, setBy, userLookup(this, argument));
+        }
+
+        this.settings.channels[channel].users[argument].shared.level = userMode;
+      }
+    } else {
+      this.emit('mode', channel, setBy, '-' + mode, argument);
+    }
+  }.bind(this));
+
   this.client.on('topic', function (channel, topic, nick, message) {
     
     this.settings.channels[channel].topic = {
