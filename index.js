@@ -74,7 +74,22 @@ function Ziggy(settings) {
     this.emit('topic', channel, topic, nick, message);
   }.bind(this));
   this.client.on('names', function (channel, nicks) {
-    
+    var nicknames = Object.keys(nicks),
+        i = 0,
+        l = nicknames.length;
+    for (; i < l; ++i) {
+      this.settings.channels[channel].users[nicknames[i]] = lookupUser(this, nicknames[i]);
+      this.settings.channels[channel].users[nicknames[i]].level = nicks[nicknames[i]];
+    }
+  });
+  this.client.on('part', function (channel, nick, reason, message) {
+    if (nick === this.settings.nickname) {
+      this.emit('ziggypart', channel);
+    } else {
+      user = lookupUser(this, nick);
+      delete this.settings.channels[channel].users[nick];
+      this.emit('part', user, channel, reason);
+    }
   });
   this.client.on('invite', function (channel, from, message) {
     
@@ -84,6 +99,7 @@ function Ziggy(settings) {
       this.emit('ziggyjoin', channel, message);
     } else {
       user = lookupUser(this, nick);
+      this.settings.channels[channel].users[nick] = user;
       this.emit('join', channel, user, message);
     }
   }.bind(this));
