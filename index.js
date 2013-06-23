@@ -61,7 +61,11 @@ Ziggy.prototype.part = function (channels, callback) {
     return;
   }
 
-  this.client.part(channels, callback);
+  this.client.part(channels, function () {
+    if (this.settings.channels[channels]) {
+      delete this.settings.channels[channels];
+      callback();
+  });
 
 };
 
@@ -74,7 +78,12 @@ Ziggy.prototype.join = function (channels, callback) {
     return;
   }
 
-  this.client.join(channels, callback);
+  this.client.join(channels, function () {
+    if (!this.settings.channels[channels]) {
+      this.settings.channels[channels] = {};
+      callback();
+    }
+  });
 };
 
 Ziggy.prototype.whois = function (nick, callback) {
