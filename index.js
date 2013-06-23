@@ -3,6 +3,19 @@ var util = require('util'),
     irc = require('irc'),
     noop = function () {};
 
+function populateUsers(ziggy) {
+  var users = Object.keys(ziggy.settings.users),
+      i = 0,
+      l = users.length
+  for (; i < l; ++i) {
+    ziggy.settings.users[users[i]].shared = {
+      userLevel: ziggy.settings.users[users[i]].userLevel,
+      authenticated: false,
+      whois: null
+    };
+  }
+}
+
 function massExecute(ziggy, command, items, callback) {
 
   callback = callback || noop;
@@ -17,16 +30,31 @@ function massExecute(ziggy, command, items, callback) {
 
 }
 
+function userList(ziggy, callback) {
+  var users = Object.keys(this.settings.users),
+      i = 0,
+      l = users.length,
+      userList = {};
+
+  for (; i < l; ++i) {
+    userList[this.settings.users[users[i]] = this.settings.users[users[i]].shared;
+    if (i === l) { callback && callback(userList); }
+  }
+}
+
 function lookupUser(ziggy, nickname) {
+  var userInfo = this.settings.users[nickname] ? this.settings.users[nickname].shared : null;
   return {
     nick: nickname,
-    info: this.settings.users[nickname]
+    info: userInfo
   };
 }
 
 function Ziggy(settings) {
 
   this.settings = settings;
+  populateUsers(this);
+
   this.client = new irc.Client(settings.server, settings.nickname,
                                { channels: settings.channels,
                                  userName: 'ziggy',
@@ -98,7 +126,7 @@ Ziggy.prototype.join = function (channels, callback) {
 Ziggy.prototype.whois = function (nick, callback) {
   this.client.whois(nick, function (info) {
     if (!this.settings[nick]) { this.settings[nick] = {}; }
-    this.settings[nick].whois = info;
+    this.settings.users[nick].shared.whois = info;
     callback && callback(lookupUser(this, nick));
   }.bind(this));
 };
@@ -113,6 +141,16 @@ Ziggy.prototype.channels = function () {
 
 Ziggy.prototype.channel = function (channel) {
   return this.settings.channels[channel];
+};
+
+Ziggy.prototype.users = function (callback) {
+  userList(this, function (list) {
+    callback && callback(list);
+  });
+};
+
+Ziggy.prototype.user = function (nickname) {
+  return lookupUser(this, nickname);
 };
 
 function start(options) {
