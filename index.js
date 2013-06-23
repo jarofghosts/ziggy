@@ -242,6 +242,8 @@ Ziggy.prototype.whois = function (nick, callback) {
   }.bind(this));
 };
 
+Ziggy.prototype.colorize = irc.colors.wrap;
+
 Ziggy.prototype.say = this.client.say;
 
 Ziggy.prototype.disconnect = this.client.disconnect;
