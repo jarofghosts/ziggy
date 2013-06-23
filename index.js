@@ -36,6 +36,15 @@ function Ziggy(settings) {
   this.client.on('registered', function () {
     this.emit('ready');
   });
+  this.client.on('topic', function (channel, topic, nick, message) {
+    
+    this.settings.channels[channel].topic = {
+      text: topic,
+      setBy: lookupUser(this, nick)
+    };
+
+    this.emit('topic', channel, topic, nick, message);
+  }.bind(this));
   this.client.on('names', function (channel, nicks) {
     
   });
@@ -90,8 +99,8 @@ Ziggy.prototype.whois = function (nick, callback) {
   this.client.whois(nick, function (info) {
     if (!this.settings[nick]) { this.settings[nick] = {}; }
     this.settings[nick].whois = info;
-    callback && callback(lookupUser(nick));
-  });
+    callback && callback(lookupUser(this, nick));
+  }.bind(this));
 };
 
 Ziggy.prototype.say = this.client.say;
