@@ -69,6 +69,8 @@ function Ziggy(settings) {
                                  realName: 'Ziggy',
                                  secure: this.settings.secure });
 
+  this.say = this.client.say;
+
   this.client.on('registered', function () {
     this.emit('ready');
   }.bind(this));
@@ -210,8 +212,6 @@ function Ziggy(settings) {
     }
   }.bind(this));
 
-  return this;
-
 }
 
 Ziggy.prototype.part = function (channels, callback) {
@@ -258,10 +258,6 @@ Ziggy.prototype.whois = function (nick, callback) {
 };
 
 Ziggy.prototype.colorize = irc.colors.wrap;
-
-Ziggy.prototype.say = function (target, message) {
-  return this.client.say(target, message);
-};
 
 Ziggy.prototype.disconnect = function (message, callback) {
   this.client.disconnect(message, callback);
