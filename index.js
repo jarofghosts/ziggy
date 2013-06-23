@@ -72,7 +72,17 @@ function Ziggy(settings) {
 
   this.client.on('registered', function () {
     this.emit('ready');
-  });
+  }.bind(this));
+
+  this.client.on('message#', function (nick, to, text, message) {
+    var user = lookupUser(this, nick);
+    this.emit('message', user, to, text);
+  }.bind(this));
+
+  this.client.on('pm', function (nick, text, message) {
+    var user = lookupUser(this, nick);
+    this.emit('pm', user, text);
+  }.bind(this));
 
   this.client.on('nick', function (oldnick, newnick, channels) {
     if (this.settings.users[oldnick]) {
@@ -163,7 +173,7 @@ function Ziggy(settings) {
       delete this.settings.channels[channel].users[nick];
       this.emit('part', user, channel, reason);
     }
-  });
+  }.bind(this));
   this.client.on('quit', function (nick, reason, channels, message) {
     var user = lookupUser(this, nick),
         i = 0,
@@ -176,7 +186,7 @@ function Ziggy(settings) {
     }
     this.emit('quit', user, reason);
 
-  });
+  }.bind(this));
   this.client.on('kick', function (channel, nick, by, reason) {
     var kicked = userLookup(this, nick),
         kicker = userLookup(this, by);
@@ -186,11 +196,11 @@ function Ziggy(settings) {
     }
 
     this.emit('kick', kicked, kicker, channel, reason);
-  });
+  }.bind(this));
   this.client.on('invite', function (channel, from, message) {
     var user = lookupUser(this, from);
     this.emit('invite', channel, user);
-  });
+  }.bind(this));
   this.client.on('join', function (channel, nick, message) {
     if (nick === this.settings.nickname) {
       this.emit('ziggyjoin', channel, message);
@@ -216,7 +226,7 @@ Ziggy.prototype.part = function (channels, callback) {
       delete this.settings.channels[channels];
     }
     callback();
-  });
+  }.bind(this));
 
 };
 
@@ -234,7 +244,7 @@ Ziggy.prototype.join = function (channels, callback) {
       this.settings.channels[channels] = {};
       callback();
     }
-  });
+  }.bind(this));
 };
 
 Ziggy.prototype.whois = function (nick, callback) {
