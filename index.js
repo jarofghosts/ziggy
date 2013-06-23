@@ -3,6 +3,14 @@ var util = require('util'),
     irc = require('irc'),
     noop = function () {};
 
+function activatePlugins(ziggy) {
+  var i = 0,
+      l = ziggy.settings.plugins.length;
+  for (; i < l; ++i) {
+    ziggy.settings.plugins[i](ziggy);
+  }
+}
+
 function populateUsers(ziggy) {
   var users = Object.keys(ziggy.settings.users),
       i = 0,
@@ -54,6 +62,7 @@ function Ziggy(settings) {
 
   this.settings = settings;
   populateUsers(this);
+  activatePlugins(this);
 
   this.client = new irc.Client(settings.server, settings.nickname,
                                { channels: settings.channels,
