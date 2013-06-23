@@ -71,6 +71,13 @@ Ziggy.prototype.join = function (channels, callback) {
   this.client.join(channels, callback);
 };
 
+Ziggy.prototype.whois = function (nick, callback) {
+  this.client.whois(nick, function (info) {
+    info.ziggy = lookupNickname(nick);
+    callback && callback(info);
+  });
+};
+
 Ziggy.prototype.say = this.client.say;
 
 Ziggy.prototype.disconnect = this.client.disconnect;
