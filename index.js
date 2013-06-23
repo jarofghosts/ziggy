@@ -18,7 +18,10 @@ function massExecute(ziggy, command, items, callback) {
 }
 
 function lookupUser(ziggy, nickname) {
-  return ziggy.settings.users[nickname];
+  return {
+    nick: nickname,
+    info: this.settings.users[nickname]
+  };
 }
 
 function Ziggy(settings) {
@@ -36,12 +39,15 @@ function Ziggy(settings) {
   this.client.on('names', function (channel, nicks) {
     
   });
+  this.client.on('invite', function (channel, from, message) {
+    
+  });
   this.client.on('join', function (channel, nick, message) {
     if (nick === this.settings.nickname) {
       this.emit('ziggyjoin', channel, message);
     } else {
-      nick = lookupUser(this, nick) || { nick: nick };
-      this.emit('join', channel, nick, message);
+      user = lookupUser(this, nick);
+      this.emit('join', channel, user, message);
     }
   }.bind(this));
 }
@@ -73,8 +79,9 @@ Ziggy.prototype.join = function (channels, callback) {
 
 Ziggy.prototype.whois = function (nick, callback) {
   this.client.whois(nick, function (info) {
-    info.ziggy = lookupNickname(nick);
-    callback && callback(info);
+    if (!this.settings[nick]) { this.settings[nick] = {}; }
+    this.settings[nick].whois = info;
+    callback && callback(lookupUser(nick));
   });
 };
 
