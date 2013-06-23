@@ -73,6 +73,8 @@ Ziggy.prototype.join = function (channels, callback) {
 
 Ziggy.prototype.say = this.client.say;
 
+Ziggy.prototype.disconnect = this.client.disconnect;
+
 function start(options) {
   
   var settings = {};
