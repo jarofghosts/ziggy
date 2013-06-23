@@ -101,7 +101,7 @@ function Ziggy(settings) {
   }.bind(this));
 
   this.client.on('+mode', function (channel, by, mode, argument) { 
-    var setBy = userLookup(this, by);
+    var setBy = lookupUser(this, by);
     if (mode === 'o' || mode === 'v') {
       var currentLevel = this.settings.channels[channel].users[argument].shared.level;
       if (currentLevel !== '@') {
@@ -109,10 +109,10 @@ function Ziggy(settings) {
         var userMode = '';
 
         if (mode == 'o') {
-          this.emit('op', channel, setBy, userLookup(this, argument));
+          this.emit('op', channel, setBy, lookupUser(this, argument));
           userMode = '@';
         } else {
-          this.emit('voice', channel, setBy, userLookup(this, argument));
+          this.emit('voice', channel, setBy, lookupUser(this, argument));
           userMode = '+';
         }
         
@@ -123,7 +123,7 @@ function Ziggy(settings) {
     }
   }.bind(this));
   this.client.on('-mode', function (channel, by, mode, argument) { 
-    var setBy = userLookup(this, by);
+    var setBy = lookupUser(this, by);
     if (mode === 'o' || mode === 'v') {
       var currentLevel = this.settings.channels[channel].users[argument].shared.level;
       if (currentLevel !== '') {
@@ -131,10 +131,10 @@ function Ziggy(settings) {
         var userMode = '';
 
         if (mode == 'o') {
-          this.emit('deop', channel, setBy, userLookup(this, argument));
+          this.emit('deop', channel, setBy, lookupUser(this, argument));
         } else {
           userMode = currentLevel == '@' ? '@' : '';
-          this.emit('devoice', channel, setBy, userLookup(this, argument));
+          this.emit('devoice', channel, setBy, lookupUser(this, argument));
         }
 
         this.settings.channels[channel].users[argument].shared.level = userMode;
@@ -187,8 +187,8 @@ function Ziggy(settings) {
 
   }.bind(this));
   this.client.on('kick', function (channel, nick, by, reason) {
-    var kicked = userLookup(this, nick),
-        kicker = userLookup(this, by);
+    var kicked = lookupUser(this, nick),
+        kicker = lookupUser(this, by);
 
     if (this.settings.channels[channel][nick]) {
       delete this.settings.channels[channel][nick];
