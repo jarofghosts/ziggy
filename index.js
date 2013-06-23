@@ -62,7 +62,6 @@ function Ziggy(settings) {
 
   this.settings = Object.create(settings);
   populateUsers(this);
-  activatePlugins(this);
 
   this.client = new irc.Client(this.settings.server, this.settings.nickname,
                                { channels: this.settings.channels,
@@ -299,7 +298,10 @@ function start(options) {
   settings.users = options.users || {};
   settings.secure = options.secure;
 
-  return new Ziggy(settings);
+  var ziggy = new Ziggy(settings);
+  activatePlugins(ziggy);
+  
+  return ziggy;
 
 }
 
