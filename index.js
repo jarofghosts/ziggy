@@ -45,13 +45,13 @@ function userList(ziggy, callback) {
       userList = {};
 
   for (; i < l; ++i) {
-    userList[this.settings.users[users[i]] = this.settings.users[users[i]].shared;
+    userList[users[i]] = this.settings.users[users[i]].shared;
     if (i === l) { callback && callback(userList); }
   }
 }
 
 function lookupUser(ziggy, nickname) {
-  var userInfo = this.settings.users[nickname] ? this.settings.users[nickname].shared : null;
+  var userInfo = ziggy.settings.users[nickname] ? ziggy.settings.users[nickname].shared : null;
   return {
     nick: nickname,
     info: userInfo
@@ -60,15 +60,15 @@ function lookupUser(ziggy, nickname) {
 
 function Ziggy(settings) {
 
-  this.settings = settings;
+  this.settings = Object.create(settings);
   populateUsers(this);
   activatePlugins(this);
 
-  this.client = new irc.Client(settings.server, settings.nickname,
-                               { channels: settings.channels,
+  this.client = new irc.Client(this.settings.server, this.settings.nickname,
+                               { channels: this.settings.channels,
                                  userName: 'ziggy',
                                  realName: 'Ziggy',
-                                 secure: settings.secure });
+                                 secure: this.settings.secure });
 
   this.client.on('registered', function () {
     this.emit('ready');
@@ -148,11 +148,13 @@ function Ziggy(settings) {
     var nicknames = Object.keys(nicks),
         i = 0,
         l = nicknames.length;
+    if (!this.settings.channels[channel]) { this.settings.channels[channel] = {}; }
+    if (!this.settings.channels[channel].users) { this.settings.channels[channel].users = {}; }
     for (; i < l; ++i) {
       this.settings.channels[channel].users[nicknames[i]] = lookupUser(this, nicknames[i]);
       this.settings.channels[channel].users[nicknames[i]].level = nicks[nicknames[i]];
     }
-  });
+  }.bind(this));
   this.client.on('part', function (channel, nick, reason, message) {
     if (nick === this.settings.nickname) {
       this.emit('ziggypart', channel);
@@ -212,7 +214,8 @@ Ziggy.prototype.part = function (channels, callback) {
   this.client.part(channels, function () {
     if (this.settings.channels[channels]) {
       delete this.settings.channels[channels];
-      callback();
+    }
+    callback();
   });
 
 };
@@ -244,9 +247,13 @@ Ziggy.prototype.whois = function (nick, callback) {
 
 Ziggy.prototype.colorize = irc.colors.wrap;
 
-Ziggy.prototype.say = this.client.say;
+Ziggy.prototype.say = function (target, message) {
+  return this.client.say(target, message);
+};
 
-Ziggy.prototype.disconnect = this.client.disconnect;
+Ziggy.prototype.disconnect = function (message, callback) {
+  this.client.disconnect(message, callback);
+};
 
 Ziggy.prototype.channels = function () {
   return this.settings.channels;
