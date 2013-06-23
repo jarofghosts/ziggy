@@ -98,6 +98,14 @@ Ziggy.prototype.say = this.client.say;
 
 Ziggy.prototype.disconnect = this.client.disconnect;
 
+Ziggy.prototype.channels = function () {
+  return this.settings.channels;
+};
+
+Ziggy.prototype.channel = function (channel) {
+  return this.settings.channels[channel];
+};
+
 function start(options) {
   
   var settings = {};
