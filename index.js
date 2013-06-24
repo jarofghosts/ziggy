@@ -261,7 +261,7 @@ function Ziggy(settings) {
 
   this.whois = function (nick, callback) {
     this.client.whois(nick, function (info) {
-      if (!this.settings.users[nick]) { this.settings.users[nick] = {}; }
+      if (!this.settings.users[nick]) { this.settings.users[nick] = { shared: {} }; }
       this.settings.users[nick].shared.whois = info;
       callback && callback(lookupUser(this, nick));
     }.bind(this));
