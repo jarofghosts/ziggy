@@ -60,16 +60,24 @@ function lookupUser(ziggy, nickname) {
 
 function Ziggy(settings) {
 
-  this.settings = Object.create(settings);
+  this.settings = {};
+
+  this.settings.server = settings.server || 'irc.freenode.org';
+  this.settings.channels = settings.channels || [];
+  this.settings.nickname = settings.nickname || 'Ziggy';
+  this.settings.plugins = settings.plugins || [];
+  this.settings.password = settings.password || '';
+  this.settings.users = settings.users || {};
+  this.settings.secure = settings.secure === undefined ? false : !!settings.secure;
+
   populateUsers(this);
+  activatePlugins(this);
 
   this.client = new irc.Client(this.settings.server, this.settings.nickname,
                                { channels: this.settings.channels,
                                  userName: 'ziggy',
                                  realName: 'Ziggy',
                                  secure: this.settings.secure });
-
-  this.say = this.client.say;
 
   this.client.on('registered', function () {
     this.emit('ready');
@@ -212,98 +220,93 @@ function Ziggy(settings) {
     }
   }.bind(this));
 
-}
+  this.say = function (target, text) {
+    return this.client.say(target, text);
+  };
 
-Ziggy.prototype.part = function (channels, callback) {
+  this.part = function (channels, callback) {
 
-  callback = callback || noop;
+    callback = callback || noop;
 
-  if (channels instanceof Array) {
-    massExecute(this, 'part', channels, callback);
-    return;
-  }
-
-  this.client.part(channels, function () {
-    if (this.settings.channels[channels]) {
-      delete this.settings.channels[channels];
+    if (channels instanceof Array) {
+      massExecute(this, 'part', channels, callback);
+      return;
     }
-    callback();
-  }.bind(this));
 
-};
-
-Ziggy.prototype.join = function (channels, callback) {
-
-  callback = callback || noop;
-
-  if (channels instanceof Array) {
-    massExecute(this, 'join', channels, callback);
-    return;
-  }
-
-  this.client.join(channels, function () {
-    if (!this.settings.channels[channels]) {
-      this.settings.channels[channels] = {};
+    this.client.part(channels, function () {
+      if (this.settings.channels[channels]) {
+        delete this.settings.channels[channels];
+      }
       callback();
+    }.bind(this));
+
+  };
+
+  this.join = function (channels, callback) {
+
+    callback = callback || noop;
+
+    if (channels instanceof Array) {
+      massExecute(this, 'join', channels, callback);
+      return;
     }
-  }.bind(this));
-};
 
-Ziggy.prototype.whois = function (nick, callback) {
-  this.client.whois(nick, function (info) {
-    if (!this.settings[nick]) { this.settings[nick] = {}; }
-    this.settings.users[nick].shared.whois = info;
-    callback && callback(lookupUser(this, nick));
-  }.bind(this));
-};
+    this.client.join(channels, function () {
+      if (!this.settings.channels[channels]) {
+        this.settings.channels[channels] = {};
+        callback();
+      }
+    }.bind(this));
+  };
 
-Ziggy.prototype.colorize = irc.colors.wrap;
+  this.whois = function (nick, callback) {
+    this.client.whois(nick, function (info) {
+      if (!this.settings[nick]) { this.settings[nick] = {}; }
+      this.settings.users[nick].shared.whois = info;
+      callback && callback(lookupUser(this, nick));
+    }.bind(this));
+  };
 
-Ziggy.prototype.disconnect = function (message, callback) {
-  this.client.disconnect(message, callback);
-};
+  this.colorize = irc.colors.wrap;
 
-Ziggy.prototype.channels = function () {
-  return this.settings.channels;
-};
+  this.disconnect = function (message, callback) {
+    this.client.disconnect(message, callback);
+  };
 
-Ziggy.prototype.channel = function (channel) {
-  return this.settings.channels[channel];
-};
+  this.channels = function () {
+    return this.settings.channels;
+  };
 
-Ziggy.prototype.users = function (callback) {
-  userList(this, function (list) {
-    callback && callback(list);
+  this.channel = function (channel) {
+    return this.settings.channels[channel];
+  };
+
+  this.users = function (callback) {
+    userList(this, function (list) {
+      callback && callback(list);
+    });
+  };
+
+  this.user = function (nickname) {
+    return lookupUser(this, nickname);
+  };
+
+  this.level = function (channel) {
+    return this.settings.channels[channel][this.settings.nickname].shared.level;
+  };
+
+  this.client.addListener('error', function (message) {
+    console.log('error: ', message);
   });
-};
 
-Ziggy.prototype.user = function (nickname) {
-  return lookupUser(this, nickname);
-};
-
-Ziggy.prototype.level = function (channel) {
-  return this.settings.channels[channel][this.settings.nickname].shared.level;
-};
-
-function start(options) {
-  
-  var settings = {};
-
-  settings.server = options.server || 'irc.freenode.org';
-  settings.channels = options.channels || [];
-  settings.nickname = options.nickname || 'Ziggy';
-  settings.plugins = options.plugins || [];
-  settings.password = options.password || '';
-  settings.users = options.users || {};
-  settings.secure = options.secure;
-
-  var ziggy = new Ziggy(settings);
-  activatePlugins(ziggy);
-  
-  return ziggy;
+  return this;
 
 }
 
 util.inherits(Ziggy, EventEmitter);
+function start(options) {
+  return new Ziggy(options);
+}
 
 module.exports = start;
+module.exports.Ziggy = Ziggy;
