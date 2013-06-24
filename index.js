@@ -267,7 +267,9 @@ function Ziggy(settings) {
     }.bind(this));
   };
 
-  this.colorize = irc.colors.wrap;
+  this.colorize = function (text, color) {
+    return irc.colors.wrap(color, text);
+  };
 
   this.disconnect = function (message, callback) {
     this.client.disconnect(message, callback);
