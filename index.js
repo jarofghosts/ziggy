@@ -18,7 +18,7 @@ function populateUsers(ziggy) {
   for (; i < l; ++i) {
     ziggy.settings.users[users[i]].shared = {
       userLevel: ziggy.settings.users[users[i]].userLevel,
-      authenticated: false,
+      authenticated: ziggy.settings.users[users[i]].password === undefined,
       whois: null
     };
   }
@@ -90,6 +90,14 @@ function Ziggy(settings) {
 
   this.client.on('pm', function (nick, text, message) {
     var user = lookupUser(this, nick);
+    if (this.settings.users[nick] && this.settings.users[nick].authenticated == false) {
+      var bits = message.split(' '),
+          command = bits[0],
+          args = bits[1];
+      if (command === 'auth') {
+        this.settings.users[nick].authenticated = (args === this.settings.users[nick].password);
+      }
+    }
     this.emit('pm', user, text);
   }.bind(this));
 
