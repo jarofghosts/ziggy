@@ -62,7 +62,7 @@ function Ziggy(settings) {
 
   this.settings = {};
 
-  this.settings.server = settings.server || 'irc.freenode.org';
+  this.settings.server = settings.server || 'irc.freenode.net';
   this.settings.channels = settings.channels || [];
   this.settings.nickname = settings.nickname || 'Ziggy';
   this.settings.plugins = settings.plugins || [];
