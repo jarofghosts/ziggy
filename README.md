@@ -16,7 +16,7 @@ Ta-da! You've got a bot online.
 
 What's that? You want it to do something? Oh. Sorry. You can make a plugin for it!
 
-## example
+## example plugin
 
 ````js
 module.exports = function (ziggy) {
