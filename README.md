@@ -54,9 +54,80 @@ var Ziggy = require('ziggy').Ziggy,
 Now we're talkin'. Pretty self-explanatory, but it will respond to all private messages with "Speak up, I can't hear you."
 as well as responding to in-channel "commands" like !reverse, !upper, and !lower with the replies associated.
 
+## events
+
+### `ready`
+bot has connected to the server
+
+### `message (user, channel, text)`
+when a message is sent in a channel
+
+### `pm (user, text)`
+when a private message is received
+
+### `nick (oldNick, user, channels)`
+when a person changes their nickname
+
+### `mode (channel, setBy, mode, argument)
+when a mode is set
+
+### `topic (channel, topic, nick)
+when a topic is set
+
+### `part (user, channel, reason)
+when a person parts a channel
+
+### `ziggypart (channel)`
+when ziggy parts a channel
+
+### `quit (user, reason)`
+when a user quits IRC
+
+### `kick (kicked, kickedBy, channel, reason)`
+when a person is kicked
+
+### `invite (channel, user)
+when a channel invitation is received
+
+### `join (channel, user)`
+when a person joins a channel
+
+### `ziggyjoin (channel)`
+when the bot joins a channel
+
 ## API
 
-*coming soon...*
+### `say(to, text)`
+where to can be a nickname or a channel
+
+### `part(channels, callback)`
+channels can be an array of channels or a string for a single channel
+
+### `join(channels, callback)`
+channels can be an array of channels or a string for a single channel
+
+### `whois(nick, callback)`
+perform a whois for `nick`, all of the user information will be passed as the first argument to `callback`
+
+### `disconnect(message, callback)`
+
+### `channels`
+return list of channels
+
+### `channel(channel)`
+get info about `channel`
+
+### `users(callback)`
+calls callback with user list
+
+### `user(nick)`
+return user information
+
+### `level(channel)`
+get bot level on `channel`
+
+### `colorize(text, color)`
+returns text formatted with `color`
 
 ## license
 MIT
