@@ -68,13 +68,13 @@ when a private message is received
 ### `nick (oldNick, user, channels)`
 when a person changes their nickname
 
-### `mode (channel, setBy, mode, argument)
+### `mode (channel, setBy, mode, argument)`
 when a mode is set
 
-### `topic (channel, topic, nick)
+### `topic (channel, topic, nick)`
 when a topic is set
 
-### `part (user, channel, reason)
+### `part (user, channel, reason)`
 when a person parts a channel
 
 ### `ziggypart (channel)`
@@ -86,7 +86,7 @@ when a user quits IRC
 ### `kick (kicked, kickedBy, channel, reason)`
 when a person is kicked
 
-### `invite (channel, user)
+### `invite (channel, user)`
 when a channel invitation is received
 
 ### `join (channel, user)`
@@ -110,6 +110,7 @@ channels can be an array of channels or a string for a single channel
 perform a whois for `nick`, all of the user information will be passed as the first argument to `callback`
 
 ### `disconnect(message, callback)`
+disconnect bot from IRC with optional message
 
 ### `channels`
 return list of channels
