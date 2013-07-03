@@ -314,6 +314,10 @@ Ziggy.prototype.user = function (nickname) {
   return lookupUser(this, nickname);
 };
 
+Ziggy.prototype.nick = function (nickname) {
+  this.client.send('/NICK', nickname);
+};
+
 Ziggy.prototype.level = function (channel) {
   return this.settings.channels[channel][this.settings.nickname].shared.level;
 };
