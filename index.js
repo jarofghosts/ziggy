@@ -109,6 +109,7 @@ Ziggy.prototype.start = function () {
   }.bind(this));
 
   this.client.on('nick', function (oldnick, newnick, channels) {
+    if (oldnick === this.settings.nickname) { this.settings.nickname = newnick; }
     if (this.settings.users[oldnick]) {
       this.settings.users[newnick] = Object.create(this.settings.users[oldnick]);
       delete this.settings.users[oldnick];

@@ -130,5 +130,8 @@ get bot level on `channel`
 ### `colorize(text, color)`
 returns text formatted with `color`
 
+### `nick(newNick)`
+change bot's name to `newNick`
+
 ## license
 MIT
