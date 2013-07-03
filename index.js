@@ -73,6 +73,13 @@ function Ziggy(settings) {
   populateUsers(this);
   activatePlugins(this);
 
+  return this;
+
+}
+
+util.inherits(Ziggy, EventEmitter);
+
+Ziggy.prototype.start = function () {
   this.client = new irc.Client(this.settings.server, this.settings.nickname,
                                { channels: this.settings.channels,
                                  userName: 'ziggy',
@@ -228,95 +235,92 @@ function Ziggy(settings) {
     }
   }.bind(this));
 
-  this.say = function (target, text) {
-    return this.client.say(target, text);
-  };
-
-  this.part = function (channels, callback) {
-
-    callback = callback || noop;
-
-    if (channels instanceof Array) {
-      massExecute(this, 'part', channels, callback);
-      return;
-    }
-
-    this.client.part(channels, function () {
-      if (this.settings.channels[channels]) {
-        delete this.settings.channels[channels];
-      }
-      callback();
-    }.bind(this));
-
-  };
-
-  this.join = function (channels, callback) {
-
-    callback = callback || noop;
-
-    if (channels instanceof Array) {
-      massExecute(this, 'join', channels, callback);
-      return;
-    }
-
-    this.client.join(channels, function () {
-      if (!this.settings.channels[channels]) {
-        this.settings.channels[channels] = {};
-        callback();
-      }
-    }.bind(this));
-  };
-
-  this.whois = function (nick, callback) {
-    this.client.whois(nick, function (info) {
-      if (!this.settings.users[nick]) { this.settings.users[nick] = { shared: {} }; }
-      this.settings.users[nick].shared.whois = info;
-      callback && callback(lookupUser(this, nick));
-    }.bind(this));
-  };
-
-  this.colorize = function (text, color) {
-    return irc.colors.wrap(color, text);
-  };
-
-  this.disconnect = function (message, callback) {
-    this.client.disconnect(message, callback);
-  };
-
-  this.channels = function () {
-    return this.settings.channels;
-  };
-
-  this.channel = function (channel) {
-    return this.settings.channels[channel];
-  };
-
-  this.users = function (callback) {
-    userList(this, function (list) {
-      callback && callback(list);
-    });
-  };
-
-  this.user = function (nickname) {
-    return lookupUser(this, nickname);
-  };
-
-  this.level = function (channel) {
-    return this.settings.channels[channel][this.settings.nickname].shared.level;
-  };
-
   this.client.addListener('error', function (message) {
     console.log('error: ', message);
   });
 
-  return this;
-
 }
 
-util.inherits(Ziggy, EventEmitter);
-function start(options) {
+Ziggy.prototype.say = function (target, text) {
+  return this.client.say(target, text);
+};
+
+Ziggy.prototype.part = function (channels, callback) {
+
+  callback = callback || noop;
+
+  if (channels instanceof Array) {
+    massExecute(this, 'part', channels, callback);
+    return;
+  }
+
+  this.client.part(channels, function () {
+    if (this.settings.channels[channels]) {
+      delete this.settings.channels[channels];
+    }
+    callback();
+  }.bind(this));
+
+};
+
+Ziggy.prototype.join = function (channels, callback) {
+
+  callback = callback || noop;
+
+  if (channels instanceof Array) {
+    massExecute(this, 'join', channels, callback);
+    return;
+  }
+
+  this.client.join(channels, function () {
+    if (!this.settings.channels[channels]) {
+      this.settings.channels[channels] = {};
+      callback();
+    }
+  }.bind(this));
+};
+
+Ziggy.prototype.whois = function (nick, callback) {
+  this.client.whois(nick, function (info) {
+    if (!this.settings.users[nick]) { this.settings.users[nick] = { shared: {} }; }
+    this.settings.users[nick].shared.whois = info;
+    callback && callback(lookupUser(this, nick));
+  }.bind(this));
+};
+
+Ziggy.prototype.colorize = function (text, color) {
+  return irc.colors.wrap(color, text);
+};
+
+Ziggy.prototype.disconnect = function (message, callback) {
+  this.client.disconnect(message, callback);
+};
+
+Ziggy.prototype.channels = function () {
+  return this.settings.channels;
+};
+
+Ziggy.prototype.channel = function (channel) {
+  return this.settings.channels[channel];
+};
+
+Ziggy.prototype.users = function (callback) {
+  userList(this, function (list) {
+    callback && callback(list);
+  });
+};
+
+Ziggy.prototype.user = function (nickname) {
+  return lookupUser(this, nickname);
+};
+
+Ziggy.prototype.level = function (channel) {
+  return this.settings.channels[channel][this.settings.nickname].shared.level;
+};
+
+module.exports.createZiggy = function (options) {
   return new Ziggy(options);
-}
+};
 
-module.exports = start;
 module.exports.Ziggy = Ziggy;
+
