@@ -11,14 +11,20 @@ function activatePlugins(ziggy) {
   }
 }
 
-function populateUsers(ziggy) {
-  var users = Object.keys(ziggy.settings.users),
+function populateUsers(ziggy, myUsers) {
+
+  if (!ziggy.settings.users) { ziggy.settings.users = {}; }
+
+  var users = Object.keys(myUsers),
       i = 0,
-      l = users.length
+      l = users.length;
+
   for (; i < l; ++i) {
-    ziggy.settings.users[users[i]].shared = {
-      userLevel: ziggy.settings.users[users[i]].userLevel,
-      authenticated: ziggy.settings.users[users[i]].password === undefined,
+    var thisUser = users[i];
+    ziggy.settings.users[thisUser] = myUsers[thisUser];
+    ziggy.settings.users[thisUser].shared = {
+      userLevel: ziggy.settings.users[thisUser].userLevel,
+      authenticated: ziggy.settings.users[thisUser].password === undefined,
       whois: null
     };
   }
@@ -67,10 +73,9 @@ function Ziggy(settings) {
   this.settings.nickname = settings.nickname || 'Ziggy';
   this.settings.plugins = settings.plugins || [];
   this.settings.password = settings.password || '';
-  this.settings.users = settings.users || {};
   this.settings.secure = settings.secure === undefined ? false : !!settings.secure;
 
-  populateUsers(this);
+  populateUsers(this, (settings.users || {}));
   activatePlugins(this);
 
   return this;
@@ -101,10 +106,13 @@ Ziggy.prototype.start = function () {
       var bits = text.split(' '),
           command = bits[0],
           args = bits[1];
-      if (command === 'auth') {
-        this.settings.users[nick].shared.authenticated = (args === this.settings.users[nick].password);
+      if (command === 'auth' && this.settings.users[nick].password === args) {
+        this.settings.users[nick].shared.authenticated = true;
+        this.emit('authed', lookupUser(this, nick));
       }
+
     }
+
     this.emit('pm', user, text);
   }.bind(this));
 
@@ -321,6 +329,10 @@ Ziggy.prototype.nick = function (nickname) {
 
 Ziggy.prototype.level = function (channel) {
   return this.settings.channels[channel][this.settings.nickname].shared.level;
+};
+
+Ziggy.prototype.register = function (users) {
+  populateUsers(this, users);
 };
 
 module.exports.createZiggy = function (options) {

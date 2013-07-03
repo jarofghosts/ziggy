@@ -54,6 +54,10 @@ var Ziggy = require('ziggy').Ziggy,
 Now we're talkin'. Pretty self-explanatory, but it will respond to all private messages with "Speak up, I can't hear you."
 as well as responding to in-channel "commands" like !reverse, !upper, and !lower with the replies associated.
 
+## users
+
+Ziggy has a really naive sense of 'users' in so much as it will store a users object containing their nickname, bot-specific password, their authenticated status (defaults to true if no password is set), and their userLevel. The userLevel is pretty much an arbitrary number that can be used to control access in plugins. So, there really isn't any innate "level heirarchy", just use it in whatever way makes sense to you. Or don't use it at all. Whatever.
+
 ## events
 
 ### `ready`
@@ -67,6 +71,9 @@ when a private message is received
 
 ### `nick (oldNick, user, channels)`
 when a person changes their nickname
+
+### `authed (user)`
+when a Ziggy user authenticates his or herself.
 
 ### `mode (channel, setBy, mode, argument)`
 when a mode is set
@@ -132,6 +139,9 @@ returns text formatted with `color`
 
 ### `nick(newNick)`
 change bot's name to `newNick`
+
+### `register(userObject)`
+add users to the registered users list- accepts an object in the same format as `users` in the startup options.
 
 ## license
 MIT
