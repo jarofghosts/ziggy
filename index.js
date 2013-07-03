@@ -179,7 +179,7 @@ Ziggy.prototype.start = function () {
   }.bind(this));
 
   this.client.on('topic', function (channel, topic, nick, message) {
-    
+    if (!this.settings.channels[channel]) { this.settings.channels[channel] = {}; }
     this.settings.channels[channel].topic = {
       text: topic,
       setBy: lookupUser(this, nick)
