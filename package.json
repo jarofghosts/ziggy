@@ -1,6 +1,6 @@
 {
   "name": "ziggy",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "irc bot with plugin support",
   "main": "index.js",
   "dependencies": {
