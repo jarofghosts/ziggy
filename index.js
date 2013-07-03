@@ -97,7 +97,7 @@ Ziggy.prototype.start = function () {
 
   this.client.on('pm', function (nick, text, message) {
     var user = lookupUser(this, nick);
-    if (this.settings.users[nick] && this.settings.users[nick].authenticated == false) {
+    if (this.settings.users[nick] && this.settings.users[nick].shared.authenticated == false) {
       var bits = message.split(' '),
           command = bits[0],
           args = bits[1];
