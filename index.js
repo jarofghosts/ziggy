@@ -332,7 +332,7 @@ Ziggy.prototype.nick = function (nickname) {
 };
 
 Ziggy.prototype.level = function (channel) {
-  return this.settings.channels[channel][this.settings.nickname].level;
+  return this.settings.channels[channel].users[this.settings.nickname].level;
 };
 
 Ziggy.prototype.mode = function (channel, mode, nick) {
