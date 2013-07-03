@@ -7,7 +7,7 @@ an irc bot in node
 
 ````js
 var Ziggy = require('ziggy').Ziggy,
-    ziggy = new Ziggy({ server: "irc.freenode.org",
+    ziggy = new Ziggy({ server: "irc.freenode.net",
                         nickname: "Gushie",
                         channels: ["#quantumleap", "#sliderssucks"] });
 ````
