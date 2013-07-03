@@ -315,7 +315,7 @@ Ziggy.prototype.user = function (nickname) {
 };
 
 Ziggy.prototype.nick = function (nickname) {
-  this.client.send('/NICK', nickname);
+  this.client.send('NICK', nickname);
 };
 
 Ziggy.prototype.level = function (channel) {
