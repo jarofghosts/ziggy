@@ -137,7 +137,7 @@ Ziggy.prototype.start = function () {
   this.client.on('+mode', function (channel, by, mode, argument) { 
     var setBy = lookupUser(this, by);
     if (mode === 'o' || mode === 'v') {
-      var currentLevel = this.settings.channels[channel].users[argument].shared.level;
+      var currentLevel = this.settings.channels[channel].users[argument].level;
       if (currentLevel !== '@') {
 
         var userMode = '';
@@ -150,7 +150,7 @@ Ziggy.prototype.start = function () {
           userMode = '+';
         }
         
-        this.settings.channels[channel].users[argument].shared.level = userMode;
+        this.settings.channels[channel].users[argument].level = userMode;
       }
     } else {
       this.emit('mode', channel, setBy, '+' + mode, argument);
@@ -159,7 +159,7 @@ Ziggy.prototype.start = function () {
   this.client.on('-mode', function (channel, by, mode, argument) { 
     var setBy = lookupUser(this, by);
     if (mode === 'o' || mode === 'v') {
-      var currentLevel = this.settings.channels[channel].users[argument].shared.level;
+      var currentLevel = this.settings.channels[channel].users[argument].level;
       if (currentLevel !== '') {
         
         var userMode = '';
@@ -171,7 +171,7 @@ Ziggy.prototype.start = function () {
           this.emit('devoice', channel, setBy, lookupUser(this, argument));
         }
 
-        this.settings.channels[channel].users[argument].shared.level = userMode;
+        this.settings.channels[channel].users[argument].level = userMode;
       }
     } else {
       this.emit('mode', channel, setBy, '-' + mode, argument);
