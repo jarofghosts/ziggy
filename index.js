@@ -254,6 +254,10 @@ Ziggy.prototype.say = function (target, text) {
   return this.client.say(target, text);
 };
 
+Ziggy.prototype.topic = function (channel, topic) {
+  this.client.send('TOPIC', channel, topic);
+};
+
 Ziggy.prototype.part = function (channels, callback) {
 
   callback = callback || noop;
@@ -329,6 +333,19 @@ Ziggy.prototype.nick = function (nickname) {
 
 Ziggy.prototype.level = function (channel) {
   return this.settings.channels[channel][this.settings.nickname].level;
+};
+
+Ziggy.prototype.mode = function (channel, mode, nick) {
+  if (nick) { this.client.send('MODE', channel, mode, nick); }
+  else { this.client.send('MODE', channel, mode); }
+};
+
+Ziggy.prototype.op = function (channel, nick) {
+  this.mode(channel, '+o', nick);
+};
+
+Ziggy.prototype.deop = function (channel, nick) {
+  this.mode(channel, '-o', nick);
 };
 
 Ziggy.prototype.register = Ziggy.prototype.update = function (users) {
