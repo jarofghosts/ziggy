@@ -331,8 +331,22 @@ Ziggy.prototype.level = function (channel) {
   return this.settings.channels[channel][this.settings.nickname].shared.level;
 };
 
-Ziggy.prototype.register = function (users) {
+Ziggy.prototype.register = Ziggy.prototype.update = function (users) {
   populateUsers(this, users);
+};
+
+Ziggy.prototype.unregister = function (users) {
+  if (!(users instanceof Array)) {
+    users = [users];
+  }
+
+  var i = 0,
+      l = users.length;
+
+  for (; i < l; ++i) {
+    delete this.settings.users[users[i]];
+  }
+
 };
 
 module.exports.createZiggy = function (options) {
