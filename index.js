@@ -97,12 +97,12 @@ Ziggy.prototype.start = function () {
 
   this.client.on('pm', function (nick, text, message) {
     var user = lookupUser(this, nick);
-    if (this.settings.users[nick] && this.settings.users[nick].shared.authenticated == false) {
+    if (this.settings.users[nick] && !this.settings.users[nick].shared.authenticated) {
       var bits = message.split(' '),
           command = bits[0],
           args = bits[1];
       if (command === 'auth') {
-        this.settings.users[nick].authenticated = (args === this.settings.users[nick].password);
+        this.settings.users[nick].shared.authenticated = (args === this.settings.users[nick].password);
       }
     }
     this.emit('pm', user, text);
