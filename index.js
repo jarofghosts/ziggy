@@ -200,6 +200,10 @@ Ziggy.prototype.say = function (target, text) {
   return this.client.say(target, text);
 };
 
+Ziggy.prototype.action = function (channel, message) {
+  return this.client.action(channel, message);
+};
+
 Ziggy.prototype.topic = function (channel, topic) {
   this.client.send('TOPIC', channel, topic);
 };

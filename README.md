@@ -140,8 +140,20 @@ returns text formatted with `color`
 ### `nick(newNick)`
 change bot's name to `newNick`
 
+### `mode(channel, mode, nick)`
+set mode on `channel` where `nick` is optional
+
+### `op(channel, nick)`
+shortcut for `mode(channel, '+o', nick)`
+
+### `deop(channel, nick)`
+shortcut for `mode(channel, '-o', nick)`
+
 ### `register(userObject)`
 add users to the registered users list- accepts an object in the same format as `users` in the startup options.
+
+### `update(userObject)`
+update user properties for users in object, same format as `users` in the startup.
 
 ## license
 MIT
