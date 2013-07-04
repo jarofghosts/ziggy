@@ -1,6 +1,7 @@
 var util = require('util'),
     EventEmitter = require('events').EventEmitter,
     irc = require('irc'),
+    extend = require('xtend'),
     noop = function () {};
 
 function activatePlugins(ziggy) {
@@ -348,8 +349,19 @@ Ziggy.prototype.deop = function (channel, nick) {
   this.mode(channel, '-o', nick);
 };
 
-Ziggy.prototype.register = Ziggy.prototype.update = function (users) {
+Ziggy.prototype.register = function (users) {
   populateUsers(this, users);
+};
+
+Ziggy.prototype.update = function (userObjects) {
+  var users = Object.keys(userObjects),
+      i = 0,
+      l = users.length;
+  for (; i < l; ++i) {
+    var user = users[i];
+    if (!this.settings.users[user]) { this.settings.users[user] = userObjects[user]; }
+    this.settings.users[user] = extend(this.settings.users[user], userObjects[user]);
+  }
 };
 
 Ziggy.prototype.unregister = function (users) {
