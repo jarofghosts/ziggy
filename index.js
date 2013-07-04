@@ -2,7 +2,14 @@ var util = require('util'),
     EventEmitter = require('events').EventEmitter,
     irc = require('irc'),
     extend = require('xtend'),
+    libz = require('./lib/libziggy.js'),
+    populateUsers = libz.populateUsers,
+    activatePlugins = libz.activatePlugins,
+    lookupUser = libz.lookupUser,
+    massExecute = libz.massExecute,
+    userList = libz.userList,
     noop = function () {};
+
 function Ziggy(settings) {
 
   this.settings = {};
