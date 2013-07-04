@@ -4,7 +4,8 @@
   "description": "irc bot with plugin support",
   "main": "index.js",
   "dependencies": {
-    "irc": "*"
+    "irc": "*",
+    "xtend": "~2.0.6"
   },
   "scripts": {
     "test": "node test/test.js"
