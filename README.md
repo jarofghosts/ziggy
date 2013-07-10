@@ -54,6 +54,7 @@ var Ziggy = require('ziggy').Ziggy,
 Now we're talkin'. Pretty self-explanatory, but it will respond to all private messages with "Speak up, I can't hear you."
 as well as responding to in-channel "commands" like !reverse, !upper, and !lower with the replies associated.
 
+Better yet, you can look at a fully-functioning example plugin [here](https://github.com/jarofghosts/ziggy-example-plugin).
 ## users
 
 Ziggy has a really naive sense of 'users' in so much as it will store a users object containing their nickname, bot-specific password, their authenticated status (defaults to true if no password is set), and their userLevel. The userLevel is pretty much an arbitrary number that can be used to control access in plugins. So, there really isn't any innate "level heirarchy", just use it in whatever way makes sense to you. Or don't use it at all. Whatever.
@@ -151,6 +152,9 @@ shortcut for `mode(channel, '-o', nick)`
 
 ### `register(userObject)`
 add users to the registered users list- accepts an object in the same format as `users` in the startup options.
+
+### `action(channel, text)`
+send an irc action of `text` to `channel`
 
 ### `update(userObject)`
 update user properties for users in object, same format as `users` in the startup.
