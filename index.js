@@ -18,7 +18,7 @@ function Ziggy(settings) {
   this.settings.channels = settings.channels || []
   this.settings.nickname = settings.nickname || 'Ziggy'
   this.settings.plugins = settings.plugins || []
-  this.settings.password = settings.password || ''
+  this.settings.password = settings.password
   this.settings.secure = !!settings.secure
 
   populateUsers(this, (settings.users || {}))
@@ -34,11 +34,13 @@ Ziggy.prototype.start = function () {
                                { channels: this.settings.channels,
                                  userName: 'ziggy',
                                  realName: 'Ziggy',
+                                 password: this.settings.password,
+                                 selfSigned: true,
+                                 certExpired: true,
+                                 port: this.settings.port,
                                  secure: this.settings.secure })
 
-  this.client.on('registered', function () {
-    this.emit('ready')
-  }.bind(this))
+  this.client.on('registered', this.emit.bind(this, 'ready'))
 
   this.client.on('message#', function (nick, to, text, message) {
     var user = lookupUser(this, nick)
