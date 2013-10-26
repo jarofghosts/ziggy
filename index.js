@@ -19,7 +19,7 @@ function Ziggy(settings) {
   this.settings.nickname = settings.nickname || 'Ziggy'
   this.settings.plugins = settings.plugins || []
   this.settings.password = settings.password || ''
-  this.settings.secure = settings.secure === undefined ? false : !!settings.secure;
+  this.settings.secure = !!settings.secure
 
   populateUsers(this, (settings.users || {}))
   activatePlugins(this)
@@ -47,7 +47,8 @@ Ziggy.prototype.start = function () {
 
   this.client.on('pm', function (nick, text, message) {
     var user = lookupUser(this, nick)
-    if (this.settings.users[nick] && !this.settings.users[nick].shared.authenticated) {
+    if (this.settings.users[nick] &&
+      !this.settings.users[nick].shared.authenticated) {
       var bits = text.split(' '),
           command = bits[0],
           args = bits[1]
@@ -61,22 +62,22 @@ Ziggy.prototype.start = function () {
   }.bind(this))
 
   this.client.on('nick', function (oldnick, newnick, channels) {
-    if (oldnick === this.settings.nickname) { this.settings.nickname = newnick; }
+    if (oldnick === this.settings.nickname) this.settings.nickname = newnick
     if (this.settings.users[oldnick]) {
-      this.settings.users[newnick] = Object.create(this.settings.users[oldnick]);
-      delete this.settings.users[oldnick];
+      this.settings.users[newnick] = Object.create(this.settings.users[oldnick])
+      delete this.settings.users[oldnick]
     }
     var i = 0,
-        l = channels.length;
+        l = channels.length
 
     for (; i < l; ++i) {
-      this.settings.channels[channels[i]].users[newnick] = Object.create(this.settings.channels[channels[i]].users[oldnick]);
-      delete this.settings.channels[channels[i]].users[oldnick];
+      this.settings.channels[channels[i]].users[newnick] = Object.create(this.settings.channels[channels[i]].users[oldnick])
+      delete this.settings.channels[channels[i]].users[oldnick]
     }
 
-    this.emit('nick', oldnick, lookupUser(this, newnick), channels);
+    this.emit('nick', oldnick, lookupUser(this, newnick), channels)
 
-  }.bind(this));
+  }.bind(this))
 
   this.client.on('+mode', function (channel, by, mode, argument) { 
     var setBy = lookupUser(this, by)
