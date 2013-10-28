@@ -2,6 +2,8 @@
 
 var Ziggy = require('../').Ziggy,
     nopt = require('nopt'),
+    fs = require('fs'),
+    path = require('path'),
     noptions = {
       plugins: Array,
       port: Number,
@@ -10,7 +12,9 @@ var Ziggy = require('../').Ziggy,
       channels: Array,
       nickname: String,
       password: String,
-      user: Array
+      user: Array,
+      help: Boolean,
+      version: Boolean
     },
     shorthands = {
       p: ['--plugin'],
@@ -23,10 +27,14 @@ var Ziggy = require('../').Ziggy,
       pass: ['--password'],
       nick: ['--nickname'],
       n: ['--nickname'],
-      u: ['--user']
+      u: ['--user'],
+      h: ['--help'],
+      v: ['--version']
     },
     options = nopt(noptions, shorthands, process.argv)
 
+if (options.help) return help()
+if (options.version) return version()
 options.users = {}
 if (options.user) {
   for (var i = 0, l = options.user.length; i < l; ++i) {
@@ -42,3 +50,14 @@ options.plugins = options.plugins.map(function (file) {
 })
 
 new Ziggy(options).start()
+
+function help() {
+  version()
+  fs.createReadStream(path.resolve(__dirname, '..', 'help.txt'))
+      .pipe(process.stdout)
+}
+
+function version() {
+  var ziggy_version = require('../package.json').version
+  process.stdout.write('ziggy version ' + ziggy_version + '\n')
+}
