@@ -37,4 +37,8 @@ if (options.user) {
   }
   delete options.user
 }
+options.plugins = options.plugins.map(function (file) {
+  return require(file)
+})
+
 new Ziggy(options).start()
