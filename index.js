@@ -11,6 +11,8 @@ var util = require('util'),
     noop = function () {}
 
 function Ziggy(settings) {
+  if (!(this instanceof Ziggy)) return new Ziggy(settings)
+
   this.settings = {}
 
   this.settings.server = settings.server || 'irc.freenode.net'
@@ -29,282 +31,298 @@ function Ziggy(settings) {
 
 util.inherits(Ziggy, EventEmitter)
 
-Ziggy.prototype.start = function () {
-  this.client = new irc.Client(this.settings.server, this.settings.nickname,
-                               { channels: this.settings.channels,
+Ziggy.prototype.start = function Ziggy$start() {
+  var self = this
+
+  self.client = new irc.Client(self.settings.server, self.settings.nickname,
+                               { channels: self.settings.channels,
                                  userName: 'ziggy',
                                  realName: 'Ziggy',
-                                 password: this.settings.password,
+                                 password: self.settings.password,
                                  selfSigned: true,
                                  certExpired: true,
-                                 port: this.settings.port,
-                                 secure: this.settings.secure })
+                                 port: self.settings.port,
+                                 secure: self.settings.secure })
 
-  this.client.on('registered', this.emit.bind(this, 'ready'))
+  self.client.on('registered', self.emit.bind(self, 'ready'))
 
-  this.client.on('message#', function (nick, to, text, message) {
-    var user = lookupUser(this, nick)
-    this.emit('message', user, to, text)
-  }.bind(this))
+  self.client.on('message#', function (nick, to, text, message) {
+    var user = lookupUser(self, nick)
+    self.emit('message', user, to, text)
+  })
 
-  this.client.on('pm', function (nick, text, message) {
-    var user = lookupUser(this, nick)
-    if (this.settings.users[nick] &&
-      !this.settings.users[nick].shared.authenticated) {
+  self.client.on('pm', function (nick, text, message) {
+    var user = lookupUser(self, nick)
+    if (self.settings.users[nick] &&
+      !self.settings.users[nick].shared.authenticated) {
       var bits = text.split(' '),
           command = bits[0],
           args = bits[1]
-      if (command === 'auth' && this.settings.users[nick].password === args) {
-        this.settings.users[nick].shared.authenticated = true
-        this.emit('authed', lookupUser(this, nick))
+      if (command === 'auth' && self.settings.users[nick].password === args) {
+        self.settings.users[nick].shared.authenticated = true
+        self.emit('authed', lookupUser(self, nick))
       }
     }
 
-    this.emit('pm', user, text);
-  }.bind(this))
+    self.emit('pm', user, text);
+  })
 
-  this.client.on('nick', function (oldnick, newnick, channels) {
-    if (oldnick === this.settings.nickname) this.settings.nickname = newnick
-    if (this.settings.users[oldnick]) {
-      this.settings.users[newnick] = Object.create(this.settings.users[oldnick])
-      delete this.settings.users[oldnick]
+  self.client.on('nick', function (oldnick, newnick, channels) {
+    if (oldnick === self.settings.nickname) self.settings.nickname = newnick
+    if (self.settings.users[oldnick]) {
+      self.settings.users[newnick] = Object.create(self.settings.users[oldnick])
+      delete self.settings.users[oldnick]
     }
     var i = 0,
         l = channels.length
 
     for (; i < l; ++i) {
-      this.settings.channels[channels[i]].users[newnick] = Object.create(this.settings.channels[channels[i]].users[oldnick])
-      delete this.settings.channels[channels[i]].users[oldnick]
+      self.settings.channels[channels[i]].users[newnick] = Object.create(self.settings.channels[channels[i]].users[oldnick])
+      delete self.settings.channels[channels[i]].users[oldnick]
     }
 
-    this.emit('nick', oldnick, lookupUser(this, newnick), channels)
+    self.emit('nick', oldnick, lookupUser(self, newnick), channels)
+  })
 
-  }.bind(this))
+  self.client.on('+mode', function (channel, by, mode, argument) { 
+    var setBy = lookupUser(self, by)
+    if (mode !== 'o' && mode !== 'v') {
+      return self.emit('mode', channel, setBy, '+' + mode, argument)
+    }
 
-  this.client.on('+mode', function (channel, by, mode, argument) { 
-    var setBy = lookupUser(this, by)
-    if (mode === 'o' || mode === 'v') {
-      var currentLevel = this.settings.channels[channel].users[argument].level
-      if (currentLevel !== '@') {
-        var userMode = ''
+    var currentLevel = self.settings.channels[channel].users[argument].level
+    if (currentLevel !== '@') {
+      var userMode = ''
 
-        if (mode == 'o') {
-          this.emit('op', channel, setBy, lookupUser(this, argument))
-          userMode = '@'
-        } else {
-          this.emit('voice', channel, setBy, lookupUser(this, argument))
-          userMode = '+'
-        }
-        
-        this.settings.channels[channel].users[argument].level = userMode
+      if (mode == 'o') {
+        self.emit('op', channel, setBy, lookupUser(self, argument))
+        userMode = '@'
+      } else {
+        self.emit('voice', channel, setBy, lookupUser(self, argument))
+        userMode = '+'
       }
-    } else {
-      this.emit('mode', channel, setBy, '+' + mode, argument)
+      
+      self.settings.channels[channel].users[argument].level = userMode
     }
-  }.bind(this))
-  this.client.on('-mode', function (channel, by, mode, argument) { 
-    var setBy = lookupUser(this, by)
-    if (mode === 'o' || mode === 'v') {
-      var currentLevel = this.settings.channels[channel].users[argument].level
-      if (currentLevel !== '') {
-        var userMode = ''
-        if (mode == 'o') {
-          this.emit('deop', channel, setBy, lookupUser(this, argument))
-        } else {
-          userMode = currentLevel == '@' ? '@' : ''
-          this.emit('devoice', channel, setBy, lookupUser(this, argument))
-        }
+  })
 
-        this.settings.channels[channel].users[argument].level = userMode
+  self.client.on('-mode', function (channel, by, mode, argument) { 
+    var setBy = lookupUser(self, by)
+    if (mode !== 'o' && mode !== 'v') {
+      return self.emit('mode', channel, setBy, '-' + mode, argument)
+    }
+
+    var currentLevel = self.settings.channels[channel].users[argument].level
+    if (currentLevel !== '') {
+      var userMode = ''
+      if (mode == 'o') {
+        self.emit('deop', channel, setBy, lookupUser(self, argument))
+      } else {
+        userMode = currentLevel == '@' ? '@' : ''
+        self.emit('devoice', channel, setBy, lookupUser(self, argument))
       }
-    } else {
-      this.emit('mode', channel, setBy, '-' + mode, argument)
-    }
-  }.bind(this))
 
-  this.client.on('topic', function (channel, topic, nick, message) {
-    if (!this.settings.channels[channel]) this.settings.channels[channel] = {}
-    this.settings.channels[channel].topic = {
+      self.settings.channels[channel].users[argument].level = userMode
+    }
+  })
+
+  self.client.on('topic', function (channel, topic, nick, message) {
+    if (!self.settings.channels[channel]) self.settings.channels[channel] = {}
+    self.settings.channels[channel].topic = {
       text: topic,
-      setBy: lookupUser(this, nick)
+      setBy: lookupUser(self, nick)
     }
 
-    this.emit('topic', channel, topic, nick, message)
-  }.bind(this))
-  this.client.on('names', function (channel, nicks) {
+    self.emit('topic', channel, topic, nick, message)
+  })
+
+  self.client.on('names', function (channel, nicks) {
     var nicknames = Object.keys(nicks),
         i = 0,
         l = nicknames.length
-    if (!this.settings.channels[channel]) this.settings.channels[channel] = {}
-    if (!this.settings.channels[channel].users) {
-      this.settings.channels[channel].users = {}
+    if (!self.settings.channels[channel]) self.settings.channels[channel] = {}
+    if (!self.settings.channels[channel].users) {
+      self.settings.channels[channel].users = {}
     }
     for (; i < l; ++i) {
-      this.settings.channels[channel].users[nicknames[i]] = lookupUser(
-        this, nicknames[i]
+      self.settings.channels[channel].users[nicknames[i]] = lookupUser(
+        self, nicknames[i]
       )
-      this.settings.channels[channel].users[nicknames[i]].level =
+
+      self.settings.channels[channel].users[nicknames[i]].level =
         nicks[nicknames[i]]
     }
-  }.bind(this))
-  this.client.on('part', function (channel, nick, reason, message) {
-    if (nick === this.settings.nickname) {
-      this.emit('ziggypart', channel)
-    } else {
-      user = lookupUser(this, nick)
-      delete this.settings.channels[channel].users[nick]
-      this.emit('part', user, channel, reason)
+  })
+
+  self.client.on('part', function (channel, nick, reason, message) {
+    if (nick === self.settings.nickname) {
+      return self.emit('ziggypart', channel)
     }
-  }.bind(this))
-  this.client.on('quit', function (nick, reason, channels, message) {
-    var user = lookupUser(this, nick),
+
+    user = lookupUser(self, nick)
+    delete self.settings.channels[channel].users[nick]
+    self.emit('part', user, channel, reason)
+  })
+
+  self.client.on('quit', function (nick, reason, channels, message) {
+    var user = lookupUser(self, nick),
         i = 0,
         l = channels.length
 
     for (; i < l; ++i) {
-      if (this.settings.channels[channels[i]] && this.settings.channels[channels[i]][nick]) {
-        delete this.settings.channels[channel[i]][nick]
+      if (self.settings.channels[channels[i]] &&
+        self.settings.channels[channels[i]][nick]) {
+        delete self.settings.channels[channel[i]][nick]
       }
     }
-    this.emit('quit', user, reason)
+    self.emit('quit', user, reason)
+  })
 
-  }.bind(this))
-  this.client.on('kick', function (channel, nick, by, reason) {
-    var kicked = lookupUser(this, nick),
-        kicker = lookupUser(this, by)
+  self.client.on('kick', function (channel, nick, by, reason) {
+    var kicked = lookupUser(self, nick),
+        kicker = lookupUser(self, by)
 
-    if (this.settings.channels[channel][nick]) {
-      delete this.settings.channels[channel][nick]
+    if (self.settings.channels[channel][nick]) {
+      delete self.settings.channels[channel][nick]
     }
 
-    this.emit('kick', kicked, kicker, channel, reason);
-  }.bind(this))
-  this.client.on('invite', function (channel, from, message) {
-    var user = lookupUser(this, from)
-    this.emit('invite', channel, user)
-  }.bind(this))
-  this.client.on('join', function (channel, nick, message) {
-    if (nick === this.settings.nickname) {
-      this.emit('ziggyjoin', channel, message)
-    } else {
-      user = lookupUser(this, nick)
-      this.settings.channels[channel].users[nick] = user
-      this.emit('join', channel, user, message)
-    }
-  }.bind(this))
+    self.emit('kick', kicked, kicker, channel, reason);
+  })
 
-  this.client.addListener('error', function (message) {
+  self.client.on('invite', function (channel, from, message) {
+    var user = lookupUser(self, from)
+    self.emit('invite', channel, user)
+  })
+
+  self.client.on('join', function (channel, nick, message) {
+    if (nick === self.settings.nickname) {
+      return self.emit('ziggyjoin', channel, message)
+    }
+
+    user = lookupUser(self, nick)
+    self.settings.channels[channel].users[nick] = user
+
+    self.emit('join', channel, user, message)
+  })
+
+  self.client.addListener('error', function (message) {
     console.log('error: ', message)
   })
 
 }
 
-Ziggy.prototype.say = function (target, text) {
+Ziggy.prototype.say = function Ziggy$say(target, text) {
   return this.client.say(target, text)
 }
 
-Ziggy.prototype.action = function (channel, message) {
+Ziggy.prototype.action = function Ziggy$action(channel, message) {
   return this.client.action(channel, message)
 }
 
-Ziggy.prototype.topic = function (channel, topic) {
+Ziggy.prototype.topic = function Ziggy$topic(channel, topic) {
   this.client.send('TOPIC', channel, topic)
 }
 
-Ziggy.prototype.part = function (channels, callback) {
+Ziggy.prototype.part = function Ziggy$part(channels, callback) {
+  var self = this
+
   callback = callback || noop
 
   if (Array.isArray(channels)) {
-    return massExecute(this, 'part', channels, callback)
+    return massExecute(self, 'part', channels, callback)
   }
 
-  this.client.part(channels, function () {
-    if (this.settings.channels[channels]) {
-      delete this.settings.channels[channels]
+  self.client.part(channels, function () {
+    if (self.settings.channels[channels]) {
+      delete self.settings.channels[channels]
     }
     callback()
-  }.bind(this))
+  })
 
 }
 
-Ziggy.prototype.join = function (channels, callback) {
+Ziggy.prototype.join = function Ziggy$join(channels, callback) {
+  var self = this
+
   callback = callback || noop
 
   if (Array.isArray(channels)) {
-    return massExecute(this, 'join', channels, callback)
+    return massExecute(self, 'join', channels, callback)
   }
 
-  this.client.join(channels, function () {
-    if (!this.settings.channels[channels]) {
-      this.settings.channels[channels] = {}
+  self.client.join(channels, function () {
+    if (!self.settings.channels[channels]) {
+      self.settings.channels[channels] = {}
       callback()
     }
-  }.bind(this))
+  })
 }
 
-Ziggy.prototype.whois = function (nick, callback) {
-  this.client.whois(nick, function (info) {
-    if (!this.settings.users[nick]) this.settings.users[nick] = { shared: {} }
-    this.settings.users[nick].shared.whois = info
-    callback && callback(lookupUser(this, nick))
-  }.bind(this))
+Ziggy.prototype.whois = function Ziggy$whois(nick, callback) {
+  var self = this
+
+  self.client.whois(nick, function (info) {
+    if (!self.settings.users[nick]) self.settings.users[nick] = { shared: {} }
+    self.settings.users[nick].shared.whois = info
+    callback && callback(lookupUser(self, nick))
+  })
 }
 
-Ziggy.prototype.colorize = function (text, color) {
+Ziggy.prototype.colorize = function Ziggy$colorize(text, color) {
   return irc.colors.wrap(color, text)
 }
 
-Ziggy.prototype.disconnect = function (message, callback) {
+Ziggy.prototype.disconnect = function Ziggy$disconnect(message, callback) {
   this.client.disconnect(message, callback)
 }
 
-Ziggy.prototype.channels = function () {
+Ziggy.prototype.channels = function Ziggy$channels() {
   return this.settings.channels
 }
 
-Ziggy.prototype.channel = function (channel) {
+Ziggy.prototype.channel = function Ziggy$channel(channel) {
   return this.settings.channels[channel]
 }
 
-Ziggy.prototype.users = function (callback) {
+Ziggy.prototype.users = function Ziggy$users(callback) {
   userList(this, function (list) {
     callback && callback(list)
   })
 }
 
-Ziggy.prototype.user = function (nickname) {
+Ziggy.prototype.user = function Ziggy$user(nickname) {
   return lookupUser(this, nickname)
 }
 
-Ziggy.prototype.nick = function (nickname) {
+Ziggy.prototype.nick = function Ziggy$nick(nickname) {
   this.client.send('NICK', nickname)
 }
 
-Ziggy.prototype.level = function (channel) {
+Ziggy.prototype.level = function Ziggy$level(channel) {
   return this.settings.channels[channel].users[this.settings.nickname].level
 }
 
-Ziggy.prototype.mode = function (channel, mode, nick) {
+Ziggy.prototype.mode = function Ziggy$mode(channel, mode, nick) {
   if (nick) {
-    this.client.send('MODE', channel, mode, nick)
-  } else {
-    this.client.send('MODE', channel, mode)
+    return this.client.send('MODE', channel, mode, nick)
   }
+
+  this.client.send('MODE', channel, mode)
 }
 
-Ziggy.prototype.op = function (channel, nick) {
+Ziggy.prototype.op = function Ziggy$op(channel, nick) {
   this.mode(channel, '+o', nick)
 }
 
-Ziggy.prototype.deop = function (channel, nick) {
+Ziggy.prototype.deop = function Ziggy$deop(channel, nick) {
   this.mode(channel, '-o', nick)
 }
 
-Ziggy.prototype.register = function (users) {
+Ziggy.prototype.register = function Ziggy$register(users) {
   populateUsers(this, users)
 }
 
-Ziggy.prototype.update = function (userObjects) {
+Ziggy.prototype.update = function Ziggy$update(userObjects) {
   var users = Object.keys(userObjects),
       i = 0,
       l = users.length;
@@ -315,7 +333,7 @@ Ziggy.prototype.update = function (userObjects) {
   }
 }
 
-Ziggy.prototype.unregister = function (users) {
+Ziggy.prototype.unregister = function Ziggy$unregister(users) {
   if (!Array.isArray(users)) {
     users = [users]
   }
@@ -327,7 +345,7 @@ Ziggy.prototype.unregister = function (users) {
   }
 }
 
-module.exports.createZiggy = function (options) {
+module.exports.createZiggy = function createZiggy(options) {
   return new Ziggy(options)
 }
 

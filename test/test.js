@@ -1,4 +1,4 @@
 var assert = require('assert'),
-    ziggy = require('../index.js');
+    ziggy = require('../index.js')
 
 assert.ok(true);

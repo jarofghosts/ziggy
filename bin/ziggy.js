@@ -45,7 +45,7 @@ if (options.user) {
   }
   delete options.user
 }
-options.plugins = options.plugins.map(function (file) {
+options.plugins = options.plugins.map(function resolve_plugins(file) {
   return require(file)
 })
 
