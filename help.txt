@@ -1,4 +1,4 @@
-================================================================
+=================================================================
 Usage: ziggy [options]
 
 Options are:
@@ -9,6 +9,5 @@ Options are:
 --plugin, -p <file>       | Use ziggy plugin module
 --nickname, -n <nick>     | Set nickname (default ziggy)
 --channel, -c <channel>   | Connect to channel on startup
---user, -u <name:pass>    | Add users for Ziggy
 --version, -v             | Print ziggy version
 --help, -h                | This thing
