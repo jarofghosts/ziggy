@@ -58,8 +58,8 @@ function Ziggy$part(channels, callback) {
   callback = callback || noop
 
   self.client.part(channels, function Ziggy_parting() {
-    if (self.settings.channels[channels]) {
-      delete self.settings.channels[channels]
+    if (self.channels[channels]) {
+      delete self.channels[channels]
     }
     callback()
   })
@@ -169,7 +169,7 @@ function Ziggy$start() {
       return self.emit('mode', channel, by, '-' + mode, argument)
     }
 
-    if (mode == 'o') {
+    if (mode === 'o') {
       self.emit('deop', channel, by, lookupUser(self, argument))
     }
 
