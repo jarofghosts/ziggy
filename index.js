@@ -4,7 +4,6 @@ var EE = require('events').EventEmitter,
 
 function Ziggy(settings) {
   if (!(this instanceof Ziggy)) return new Ziggy(settings)
-  var ENV = process.env
 
   this.server = settings.server || 'irc.freenode.net'
   this.port = settings.port || 6667
