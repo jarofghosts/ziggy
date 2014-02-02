@@ -6,15 +6,17 @@ function Ziggy(settings) {
   if (!(this instanceof Ziggy)) return new Ziggy(settings)
   var ENV = process.env
 
-  this.server = settings.server || ENV.ZIGGY_SERVER || 'irc.freenode.net'
-  this.port = settings.port || +ENV.ZIGGY_PORT || 6667
-  this.channels = settings.channels || ENV.ZIGGY_CHANNELS.split(',') || []
-  this.nickname = settings.nickname || ENV.ZIGGY_NICK || 'Ziggy'
-  this.plugins = settings.plugins || ENV.ZIGGY_PLUGINS.split(',') || []
-  this.password = settings.password || ENV.ZIGGY_PASSWORD
-  this.secure = !!settings.secure || ENV.ZIGGY_SECURE
+  this.server = settings.server || 'irc.freenode.net'
+  this.port = settings.port || 6667
+  this.channels = settings.channels || []
+  this.nickname = settings.nickname || 'Ziggy'
+  this.plugins = settings.plugins || []
+  this.password = settings.password
+  this.secure = !!settings.secure
 
-  if (this.plugins.length) this.activatePlugins()
+  for (var i = 0, l = this.plugins.length; i < l; ++i) {
+    this.plugins[i](this)
+  }
 
   return this
 }
@@ -37,7 +39,6 @@ proto.nick = Ziggy$nick
 proto.mode = Ziggy$mode
 proto.op = Ziggy$op
 proto.deop = Ziggy$deop
-proto.activatePlugins = Ziggy$activatePlugins
 
 function Ziggy$say(target, text) {
   return this.client.say(target, text)
@@ -119,13 +120,6 @@ function Ziggy$deop(channel, nick) {
   return this.mode(channel, '-o', nick)
 }
 
-
-function Ziggy$activatePlugins() {
-  for (var i = 0, l = this.plugins.length; i < l; ++i) {
-    this.plugins[i](this)
-  }
-}
-
 function Ziggy$start() {
   var self = this
 
@@ -159,16 +153,15 @@ function Ziggy$start() {
   })
 
   self.client.on('+mode', function (channel, by, mode, argument) { 
-    var setBy = lookupUser(self, by)
     if (mode !== 'o' && mode !== 'v') {
-      return self.emit('mode', channel, setBy, '+' + mode, argument)
+      return self.emit('mode', channel, by, '+' + mode, argument)
     }
 
     if (mode == 'o') {
-      return self.emit('op', channel, setBy, argument)
+      return self.emit('op', channel, by, argument)
     }
 
-    self.emit('voice', channel, setBy, argument)
+    self.emit('voice', channel, by, argument)
   })
 
   self.client.on('-mode', function (channel, by, mode, argument) { 

@@ -12,7 +12,6 @@ var Ziggy = require('../').Ziggy,
       channels: Array,
       nickname: String,
       password: String,
-      user: Array,
       help: Boolean,
       version: Boolean
     },
@@ -27,7 +26,6 @@ var Ziggy = require('../').Ziggy,
       pass: ['--password'],
       nick: ['--nickname'],
       n: ['--nickname'],
-      u: ['--user'],
       h: ['--help'],
       v: ['--version']
     },
@@ -45,7 +43,7 @@ if (options.user) {
   }
   delete options.user
 }
-options.plugins = options.plugins.map(function resolve_plugins(file) {
+options.plugins = (options.plugins || []).map(function resolve_plugins(file) {
   return require(file)
 })
 
