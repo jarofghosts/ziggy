@@ -41,12 +41,13 @@ if (options.user) {
     var pair = options.user[i],
         pieces = pair.split(':')
 
-    options.users[pieces[0]] = pieces[1]
+    options.users[pieces[0]] = { userLevel: 3, password: pieces[1] }
   }
   delete options.user
 }
+
 options.plugins = (options.plugins || []).map(function resolve_plugins(file) {
-  return require(file)
+  return require(path.resolve(file))
 })
 
 new Ziggy(options).start()
