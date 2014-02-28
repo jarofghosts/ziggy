@@ -1,8 +1,7 @@
-var util = require('util'),
-    EE = require('events').EventEmitter,
-    irc = require('irc'),
-    extend = require('xtend'),
-    noop = function () {}
+var util = require('util')
+  , EE = require('events').EventEmitter
+  , irc = require('irc')
+  , extend = require('xtend')
 
 module.exports.Ziggy = Ziggy
 
@@ -433,3 +432,5 @@ Ziggy.prototype.lookupUser = function Ziggy$lookupUser(nickname) {
 module.exports.createZiggy = function createZiggy(options) {
   return new Ziggy(options)
 }
+
+function noop() {}
