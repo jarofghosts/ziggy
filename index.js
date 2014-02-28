@@ -1,14 +1,10 @@
 var util = require('util'),
-    EventEmitter = require('events').EventEmitter,
+    EE = require('events').EventEmitter,
     irc = require('irc'),
     extend = require('xtend'),
-    libz = require('./lib/libziggy.js'),
-    populateUsers = libz.populateUsers,
-    activatePlugins = libz.activatePlugins,
-    lookupUser = libz.lookupUser,
-    massExecute = libz.massExecute,
-    userList = libz.userList,
     noop = function () {}
+
+module.exports.Ziggy = Ziggy
 
 function Ziggy(settings) {
   if (!(this instanceof Ziggy)) return new Ziggy(settings)
@@ -21,136 +17,185 @@ function Ziggy(settings) {
   this.settings.nickname = settings.nickname || 'Ziggy'
   this.settings.plugins = settings.plugins || []
   this.settings.password = settings.password
+  this.settings.users = {}
   this.settings.secure = !!settings.secure
 
-  populateUsers(this, (settings.users || {}))
-  activatePlugins(this)
+  var i
+    , l
+
+  for (i = 0, l = this.settings.plugins.length; i < l; ++i) {
+    this.settings.plugins[i](this)
+  }
+
+  var users = Object.keys(settings.users)
+
+  for (i = 0, l = users.length; i < l; ++i) {
+    var user = users[i]
+
+    this.settings.users[user] = users[user]
+    this.settings.users[user].shared = {
+      userLevel: this.settings.users[user].userLevel,
+      authenticated: this.settings.users[user].password === undefined,
+      whois: null
+    }
+  }
 
   return this
 }
 
-util.inherits(Ziggy, EventEmitter)
+util.inherits(Ziggy, EE)
 
 Ziggy.prototype.start = function Ziggy$start() {
   var self = this
+    , options
 
-  self.client = new irc.Client(self.settings.server, self.settings.nickname,
-                               { channels: self.settings.channels,
-                                 userName: 'ziggy',
-                                 realName: 'Ziggy',
-                                 password: self.settings.password,
-                                 selfSigned: true,
-                                 certExpired: true,
-                                 port: self.settings.port,
-                                 secure: self.settings.secure })
+  options = {
+      channels: self.settings.channels
+    , userName: 'ziggy'
+    , realName: 'Ziggy'
+    , password: self.settings.password
+    , selfSigned: true
+    , certExpired: true
+    , port: self.settings.port
+    , secure: self.settings.secure
+  }
+
+  self.client = new irc.Client(
+      self.settings.server
+    , self.settings.nickname
+    , options
+  )
 
   self.client.on('registered', self.emit.bind(self, 'ready'))
 
   self.client.on('message#', function (nick, to, text, message) {
-    var user = lookupUser(self, nick)
+    var user = self.lookupUser(nick)
+
     self.emit('message', user, to, text)
   })
 
   self.client.on('pm', function (nick, text, message) {
-    var user = lookupUser(self, nick)
+    var user = self.lookupUser(nick)
+
     if (self.settings.users[nick] &&
       !self.settings.users[nick].shared.authenticated) {
-      var bits = text.split(' '),
-          command = bits[0],
-          args = bits[1]
+
+      var bits = text.split(' ')
+        , command = bits[0]
+        , args = bits[1]
+
       if (command === 'auth' && self.settings.users[nick].password === args) {
         self.settings.users[nick].shared.authenticated = true
-        self.emit('authed', lookupUser(self, nick))
+
+        self.emit('authed', self.lookupUser(nick))
       }
     }
 
-    self.emit('pm', user, text);
+    self.emit('pm', user, text)
   })
 
   self.client.on('nick', function (oldnick, newnick, channels) {
+    var channel
+
     if (oldnick === self.settings.nickname) self.settings.nickname = newnick
+
     if (self.settings.users[oldnick]) {
-      self.settings.users[newnick] = Object.create(self.settings.users[oldnick])
+      self.settings.users[newnick] =
+          Object.create(self.settings.users[oldnick])
+
       delete self.settings.users[oldnick]
     }
-    var i = 0,
-        l = channels.length
 
-    for (; i < l; ++i) {
-      self.settings.channels[channels[i]].users[newnick] = Object.create(self.settings.channels[channels[i]].users[oldnick])
+    for (var i = 0, l = channels.length; i < l; ++i) {
+      channel = channels[i]
+
+      self.settings.channels[channel].users[newnick] = Object.create(
+          self.settings.channels[channel].users[oldnick]
+      )
+
       delete self.settings.channels[channels[i]].users[oldnick]
     }
 
-    self.emit('nick', oldnick, lookupUser(self, newnick), channels)
+    self.emit('nick', oldnick, self.lookupUser(newnick), channels)
   })
 
   self.client.on('+mode', function (channel, by, mode, argument) { 
-    var setBy = lookupUser(self, by)
+    var set_by = self.lookupUser(by)
+      , current_level
+      , user_mode
+
     if (mode !== 'o' && mode !== 'v') {
-      return self.emit('mode', channel, setBy, '+' + mode, argument)
+      return self.emit('mode', channel, set_by, '+' + mode, argument)
     }
 
-    var currentLevel = self.settings.channels[channel].users[argument].level
-    if (currentLevel !== '@') {
-      var userMode = ''
+    current_level = self.settings.channels[channel].users[argument].level
 
-      if (mode == 'o') {
-        self.emit('op', channel, setBy, lookupUser(self, argument))
-        userMode = '@'
-      } else {
-        self.emit('voice', channel, setBy, lookupUser(self, argument))
-        userMode = '+'
-      }
-      
-      self.settings.channels[channel].users[argument].level = userMode
-    }
+    if (current_level === '@') return
+
+    self.emit(
+        mode === 'o' ? 'op' : 'voice'
+      , channel
+      , set_by
+      , self.lookupUser(argument)
+    )
+
+    user_mode = mode === 'o' ? '@' : '+'
+    
+    self.settings.channels[channel].users[argument].level = user_mode
   })
 
   self.client.on('-mode', function (channel, by, mode, argument) { 
-    var setBy = lookupUser(self, by)
+    var set_by = self.lookupUser(by)
+      , current_level
+
     if (mode !== 'o' && mode !== 'v') {
-      return self.emit('mode', channel, setBy, '-' + mode, argument)
+      return self.emit('mode', channel, set_by, '-' + mode, argument)
     }
 
-    var currentLevel = self.settings.channels[channel].users[argument].level
-    if (currentLevel !== '') {
-      var userMode = ''
-      if (mode == 'o') {
-        self.emit('deop', channel, setBy, lookupUser(self, argument))
+    current_level = self.settings.channels[channel].users[argument].level
+
+    if (current_level.length) {
+      var user_mode = ''
+
+      if (mode === 'o') {
+        self.emit('deop', channel, set_by, self.lookupUser(argument))
       } else {
-        userMode = currentLevel == '@' ? '@' : ''
-        self.emit('devoice', channel, setBy, lookupUser(self, argument))
+        user_mode = current_level == '@' ? '@' : ''
+        self.emit('devoice', channel, set_by, self.lookupUser(argument))
       }
 
-      self.settings.channels[channel].users[argument].level = userMode
+      self.settings.channels[channel].users[argument].level = user_mode
     }
   })
 
   self.client.on('topic', function (channel, topic, nick, message) {
     if (!self.settings.channels[channel]) self.settings.channels[channel] = {}
+
     self.settings.channels[channel].topic = {
-      text: topic,
-      setBy: lookupUser(self, nick)
+        text: topic
+      , setBy: self.lookupUser(nick)
     }
 
     self.emit('topic', channel, topic, nick, message)
   })
 
   self.client.on('names', function (channel, nicks) {
-    var nicknames = Object.keys(nicks),
-        i = 0,
-        l = nicknames.length
+    var nicknames = Object.keys(nicks)
+      , nickname
+
     if (!self.settings.channels[channel]) self.settings.channels[channel] = {}
     if (!self.settings.channels[channel].users) {
       self.settings.channels[channel].users = {}
     }
-    for (; i < l; ++i) {
-      self.settings.channels[channel].users[nicknames[i]] = lookupUser(
-        self, nicknames[i]
+
+    for (var i = 0, l = nicknames.length; i < l; ++i) {
+      nickname = nicknames[i]
+
+      self.settings.channels[channel].users[nickname] = self.lookupUser(
+          nickname
       )
 
-      self.settings.channels[channel].users[nicknames[i]].level =
-        nicks[nicknames[i]]
+      self.settings.channels[channel].users[nickname].level = nicks[nickname]
     }
   })
 
@@ -159,38 +204,44 @@ Ziggy.prototype.start = function Ziggy$start() {
       return self.emit('ziggypart', channel)
     }
 
-    user = lookupUser(self, nick)
+    user = self.lookupUser(nick)
+
     delete self.settings.channels[channel].users[nick]
+
     self.emit('part', user, channel, reason)
   })
 
   self.client.on('quit', function (nick, reason, channels, message) {
-    var user = lookupUser(self, nick),
-        i = 0,
-        l = channels.length
+    var user = self.lookupUser(nick)
+      , channel
 
-    for (; i < l; ++i) {
-      if (self.settings.channels[channels[i]] &&
-        self.settings.channels[channels[i]][nick]) {
-        delete self.settings.channels[channel[i]][nick]
+    for (var i = 0, l = channels.length; i < l; ++i) {
+      channel = channels[i]
+
+      if (self.settings.channels[channel] &&
+          self.settings.channels[channel][nick]) {
+
+        delete self.settings.channels[channel][nick]
       }
     }
+
     self.emit('quit', user, reason)
   })
 
   self.client.on('kick', function (channel, nick, by, reason) {
-    var kicked = lookupUser(self, nick),
-        kicker = lookupUser(self, by)
+    var kicked = self.lookupUser(nick)
+      , kicker = self.lookupUser(by)
 
     if (self.settings.channels[channel][nick]) {
       delete self.settings.channels[channel][nick]
     }
 
-    self.emit('kick', kicked, kicker, channel, reason);
+    self.emit('kick', kicked, kicker, channel, reason)
   })
 
   self.client.on('invite', function (channel, from, message) {
-    var user = lookupUser(self, from)
+    var user = self.lookupUser(from)
+
     self.emit('invite', channel, user)
   })
 
@@ -199,7 +250,8 @@ Ziggy.prototype.start = function Ziggy$start() {
       return self.emit('ziggyjoin', channel, message)
     }
 
-    user = lookupUser(self, nick)
+    user = self.lookupUser(nick)
+
     self.settings.channels[channel].users[nick] = user
 
     self.emit('join', channel, user, message)
@@ -208,7 +260,6 @@ Ziggy.prototype.start = function Ziggy$start() {
   self.client.addListener('error', function (message) {
     console.log('error: ', message)
   })
-
 }
 
 Ziggy.prototype.say = function Ziggy$say(target, text) {
@@ -229,16 +280,20 @@ Ziggy.prototype.part = function Ziggy$part(channels, callback) {
   callback = callback || noop
 
   if (Array.isArray(channels)) {
-    return massExecute(self, 'part', channels, callback)
+    channels.forEach(function(channel) {
+      self.part(channel)
+    })
+
+    return callback()
   }
 
   self.client.part(channels, function () {
     if (self.settings.channels[channels]) {
       delete self.settings.channels[channels]
     }
+
     callback()
   })
-
 }
 
 Ziggy.prototype.join = function Ziggy$join(channels, callback) {
@@ -247,7 +302,11 @@ Ziggy.prototype.join = function Ziggy$join(channels, callback) {
   callback = callback || noop
 
   if (Array.isArray(channels)) {
-    return massExecute(self, 'join', channels, callback)
+    channels.forEach(function(channel) {
+      self.join(channel)
+    })
+
+    return callback()
   }
 
   self.client.join(channels, function () {
@@ -264,7 +323,8 @@ Ziggy.prototype.whois = function Ziggy$whois(nick, callback) {
   self.client.whois(nick, function (info) {
     if (!self.settings.users[nick]) self.settings.users[nick] = { shared: {} }
     self.settings.users[nick].shared.whois = info
-    callback && callback(lookupUser(self, nick))
+
+    if (callback) callback(self.lookupUser(nick))
   })
 }
 
@@ -285,13 +345,11 @@ Ziggy.prototype.channel = function Ziggy$channel(channel) {
 }
 
 Ziggy.prototype.users = function Ziggy$users(callback) {
-  userList(this, function (list) {
-    callback && callback(list)
-  })
+  return this.userList()
 }
 
 Ziggy.prototype.user = function Ziggy$user(nickname) {
-  return lookupUser(this, nickname)
+  return this.lookupUser(nickname)
 }
 
 Ziggy.prototype.nick = function Ziggy$nick(nickname) {
@@ -323,30 +381,55 @@ Ziggy.prototype.register = function Ziggy$register(users) {
 }
 
 Ziggy.prototype.update = function Ziggy$update(userObjects) {
-  var users = Object.keys(userObjects),
-      i = 0,
-      l = users.length;
-  for (; i < l; ++i) {
-    var user = users[i]
-    if (!this.settings.users[user]) this.settings.users[user] = userObjects[user]
-    this.settings.users[user] = extend(this.settings.users[user], userObjects[user])
+  var users = Object.keys(userObjects)
+    , user
+
+  for (i = 0, l = users.length; i < l; ++i) {
+    user = users[i]
+
+    if (!this.settings.users[user]) {
+      this.settings.users[user] = userObjects[user]
+    }
+
+    this.settings.users[user] = extend(
+        this.settings.users[user]
+      , userObjects[user]
+    )
   }
 }
 
 Ziggy.prototype.unregister = function Ziggy$unregister(users) {
-  if (!Array.isArray(users)) {
-    users = [users]
+  if (!Array.isArray(users)) users = [users]
+
+  for (var i = 0, l = users.length; i < l; ++i) {
+    delete this.settings.users[users[i]]
+  }
+}
+
+Ziggy.prototype.userList = function Ziggy$userList() {
+  var users = Object.keys(this.settings.users)
+    , user_list = {}
+    , user
+
+  for (var i = 0, l = users.length; i < l; ++i) {
+    user = users[i]
+
+    user_list[user] = this.settings.users[user].shared
   }
 
-  var i = 0,
-      l = users.length
-  for (; i < l; ++i) {
-    delete this.settings.users[users[i]];
+  return user_list
+}
+
+Ziggy.prototype.lookupUser = function Ziggy$lookupUser(nickname) {
+  var user_info = this.settings.users[nickname] ?
+      this.settings.users[nickname].shared : null
+
+  return {
+      nick: nickname
+    , info: user_info
   }
 }
 
 module.exports.createZiggy = function createZiggy(options) {
   return new Ziggy(options)
 }
-
-module.exports.Ziggy = Ziggy
