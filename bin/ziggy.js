@@ -6,7 +6,7 @@ var Ziggy = require('../').Ziggy
   , fs = require('fs')
 
 var noptions = {
-    plugins: Array
+    plugin: Array
   , port: Number
   , server: String
   , secure: Boolean
@@ -25,7 +25,7 @@ var shorthands = {
   , S: ['--secure']
   , c: ['--channels']
   , channel: ['--channels']
-  , plugin: ['--plugins']
+  , plugin: ['--plugin']
   , pass: ['--password']
   , nick: ['--nickname']
   , n: ['--nickname']
@@ -62,7 +62,10 @@ if (options.user) {
   delete options.user
 }
 
-options.plugins = (options.plugins || []).map(resolve_plugin)
+options.plugins = [] 
+options.plugin = options.plugin || []
+
+options.plugin.forEach(setup_plugin)
 
 new Ziggy(options).start()
 
@@ -76,6 +79,15 @@ function version() {
   var ziggy_version = require('../package.json').version
 
   process.stdout.write('ziggy version ' + ziggy_version + '\n')
+}
+
+function setup_plugin(file) {
+  var plugin = {
+      setup: resolve_plugin(file)
+    , name: file
+  }
+
+  options.plugins.push(plugin)
 }
 
 function resolve_plugin(file) {

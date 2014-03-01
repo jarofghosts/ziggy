@@ -1,16 +1,18 @@
 ziggy
-===
+====
 
 an irc bot in node
 
 ## usage
 
-````js
-var Ziggy = require('ziggy').Ziggy,
-    ziggy = new Ziggy({ server: "irc.freenode.net",
-                        nickname: "Gushie",
-                        channels: ["#quantumleap", "#sliderssucks"] })
-````
+```js
+var Ziggy = require('ziggy').Ziggy
+  , ziggy = new Ziggy({
+        server: 'irc.freenode.net',
+      , nickname: 'Gushie',
+      , channels: ['#quantumleap', '#sliderssucks']
+    })
+```
 
 Ta-da! You've got a bot online.
 
@@ -20,11 +22,13 @@ it!
 ## example plugin
 
 ```js
-module.exports = function (ziggy) {
-  ziggy.on('pm', function (user, text) {
-    ziggy.say(user.nick, "Speak up, I can't hear you.")
+module.exports = function(ziggy) {
+
+  ziggy.on('pm', function(user, text) {
+    ziggy.say(user.nick, 'Speak up, I can\'t hear you.')
   })
-  ziggy.on('message', function (user, channel, text) {
+
+  ziggy.on('message', function(user, channel, text) {
     var bits = text.split(' ')
       , command = bits.shift()
 
@@ -45,12 +49,14 @@ Save something like that as, say, dumb-plugin.js and then modify your main code
 a bit.
 
 ```js
-var Ziggy = require('ziggy').Ziggy,
-    dumbPlugin = require('dumb-plugin.js'),
-    ziggy = new Ziggy({ server: "irc.freenode.org",
-                        nickname: "Gushie",
-                        plugins: [dumbPlugin],
-                        channels: ["#quantumleap", "#sliderssucks"] });
+var Ziggy = require('ziggy').Ziggy
+  , dumbPlugin = require('dumb-plugin.js')
+  , ziggy = new Ziggy({
+        server: 'irc.freenode.org'
+      , nickname: 'Gushie'
+      , plugins: [{name: 'dumb plugin', setup: dumbPlugin}]
+      , channels: ['#quantumleap', '#sliderssucks']
+    })
 ```
 
 Now we're talkin'. Pretty self-explanatory, but it will respond to all private

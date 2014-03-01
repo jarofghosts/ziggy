@@ -30,7 +30,7 @@ inherits(Ziggy, EE)
 
 Ziggy.prototype.activatePlugins = function Ziggy$activatePlugins() {
   for (var i = 0, l = this.settings.plugins.length; i < l; ++i) {
-    this.settings.plugins[i](this)
+    this.settings.plugins[i].setup(this)
   }
 }
 
