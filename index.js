@@ -426,7 +426,7 @@ function populate_users(self, users) {
   var user_names = Object.keys(users || {})
     , user
 
-  for (var i = 0, l = users.length; i < l; ++i) {
+  for (var i = 0, l = user_names.length; i < l; ++i) {
     user = user_names[i]
 
     self.settings.users[user] = users[user]
