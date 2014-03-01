@@ -20,8 +20,7 @@ function Ziggy(settings) {
   this.settings.users = {}
   this.settings.secure = !!settings.secure
 
-  var users = Object.keys(settings.users || {})
-  populate_users(this, users)
+  populate_users(this, settings.users)
 
   return this
 }
@@ -424,10 +423,11 @@ function createZiggy(options) {
 }
 
 function populate_users(self, users) {
-  var user
+  var user_names = Object.keys(users || {})
+    , user
 
   for (var i = 0, l = users.length; i < l; ++i) {
-    user = users[i]
+    user = user_names[i]
 
     self.settings.users[user] = users[user]
     self.settings.users[user].shared = {
