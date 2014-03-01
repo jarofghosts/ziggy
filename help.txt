@@ -2,13 +2,13 @@
 Usage: ziggy [options]
 
 Options are:
---server, -s <server>     | IRC server (default irc.freenode.net)
---port, -P <port>         | Server port (default 6667)
---password <password>     | Server password
---secure, -S              | Use secure connection
---plugin, -p <file>       | Use ziggy plugin module
---nickname, -n <nick>     | Set nickname (default ziggy)
---channel, -c <channel>   | Connect to channel on startup
---user, -u <name:pass>    | Add users for Ziggy
---version, -v             | Print ziggy version
---help, -h                | This thing
+--server, -s <server>       | IRC server (default irc.freenode.net)
+--port, -P <port>           | Server port (default 6667)
+--password <password>       | Server password
+--secure, -S                | Use secure connection
+--plugin, -p <file|module>  | Use ziggy plugin module
+--nickname, -n <nick>       | Set nickname (default ziggy)
+--channel, -c <channel>     | Connect to channel on startup
+--user, -u <name:pass>      | Add users for Ziggy
+--version, -v               | Print ziggy version
+--help, -h                  | This thing

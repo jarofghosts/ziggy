@@ -3,14 +3,13 @@
   "version": "0.2.5",
   "description": "irc bot with plugin support",
   "main": "index.js",
-  "preferGlobal": true,
   "bin": {
     "ziggy": "./bin/ziggy.js"
   },
   "dependencies": {
-    "xtend": "~2.0.6",
-    "irc": "~0.3.6",
-    "nopt": "~2.1.2"
+    "xtend": "2.0.6",
+    "irc": "0.3.6",
+    "nopt": "2.1.2"
   },
   "scripts": {
     "test": "node test/test.js"
@@ -26,8 +25,6 @@
   ],
   "author": "jesse keane",
   "license": "MIT",
-  "readmeFilename": "README.md",
-  "gitHead": "28c2ae7d7b37be23695a910383495f9f91183342",
   "bugs": {
     "url": "https://github.com/jarofghosts/ziggy/issues"
   }
