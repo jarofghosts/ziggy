@@ -34,7 +34,7 @@ Ziggy.prototype.activatePlugins = function Ziggy$activatePlugins() {
 }
 
 Ziggy.prototype.deactivatePlugins = function Ziggy$deactivatePlugins() {
-  self.removeAllListeners()
+  this.removeAllListeners()
 }
 
 Ziggy.prototype.start = function Ziggy$start() {
