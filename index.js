@@ -355,8 +355,9 @@ Ziggy.prototype.users = function Ziggy$users(callback) {
 }
 
 Ziggy.prototype.user = function Ziggy$user(nickname) {
-  var user_info = this.settings.users[nickname] ?
-      this.settings.users[nickname].shared : null
+  var default_user_info = { userLevel: 0, authenticated: false }
+    , user_info = this.settings.users[nickname] ?
+      this.settings.users[nickname].shared : default_user_info
 
   return {
       nick: nickname
