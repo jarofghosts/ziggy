@@ -8,10 +8,12 @@ an irc bot in node
 ```js
 var Ziggy = require('ziggy').Ziggy
   , ziggy = new Ziggy({
-        server: 'irc.freenode.net',
-      , nickname: 'Gushie',
+        server: 'irc.freenode.net'
+      , nickname: 'Gushie'
       , channels: ['#quantumleap', '#sliderssucks']
     })
+
+  ziggy.start()
 ```
 
 Ta-da! You've got a bot online.
@@ -57,6 +59,8 @@ var Ziggy = require('ziggy').Ziggy
       , plugins: [{name: 'dumb plugin', setup: dumbPlugin}]
       , channels: ['#quantumleap', '#sliderssucks']
     })
+
+  ziggy.start()
 ```
 
 Now we're talkin'. Pretty self-explanatory, but it will respond to all private
@@ -65,6 +69,26 @@ messages with "Speak up, I can't hear you." as well as responding to in-channel
 
 Better yet, you can look at a fully-functioning example plugin
 [here](https://github.com/jarofghosts/ziggy-example-plugin).
+
+## as a command line tool
+
+If you install ziggy globally (`npm install -g ziggy`), you will magically gain
+access to the `ziggy` command that works like this:
+
+`ziggy [options]`
+
+options are:
+
+* `--server, -s <server>` IRC server (default irc.freenode.net)
+* `--port, -P <port>` Server port (default 6667)
+* `--password <password>` Server password
+* `--secure, -S` Use secure connection
+* `--plugin, -p <filemodule>`| Use ziggy plugin module
+* `--nickname, -n <nick>` Set nickname (default ziggy)
+* `--channel, -c <channel>` Connect to channel on startup
+* `--user, -u <name:pass>` Add users for Ziggy
+* `--version, -v` Print ziggy version
+* `--help, -h` Print help
 
 ## users
 

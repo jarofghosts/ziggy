@@ -36,18 +36,18 @@ var shorthands = {
 
 var options = nopt(noptions, shorthands, process.argv)
 
-if (options.help) return help()
-if (options.version) return version()
+if(options.help) return help()
+if(options.version) return version()
 
 options.users = {}
 
-if (options.user) {
+if(options.user) {
   var password
     , pieces
     , nick
     , pair
 
-  for (var i = 0, l = options.user.length; i < l; ++i) {
+  for(var i = 0, l = options.user.length; i < l; ++i) {
     pair = options.user[i]
     pieces = pair.split(':')
     nick = pieces[0]
