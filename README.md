@@ -15,7 +15,7 @@ var Ziggy = require('ziggy').Ziggy
       , channels: ['#quantumleap', '#sliderssucks']
     })
 
-  ziggy.start()
+ziggy.start()
 ```
 
 Ta-da! You've got a bot online.
@@ -62,7 +62,7 @@ var Ziggy = require('ziggy').Ziggy
       , channels: ['#quantumleap', '#sliderssucks']
     })
 
-  ziggy.start()
+ziggy.start()
 ```
 
 Now we're talkin'. Pretty self-explanatory, but it will respond to all private
