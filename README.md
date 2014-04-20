@@ -1,6 +1,8 @@
 ziggy
 ====
 
+[![Build Status](https://travis-ci.org/jarofghosts/ziggy.svg?branch=master)](https://travis-ci.org/jarofghosts/ziggy)
+
 an irc bot in node
 
 ## usage
