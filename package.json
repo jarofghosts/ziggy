@@ -12,7 +12,7 @@
     "nopt": "2.1.2"
   },
   "scripts": {
-    "test": "node test/test.js"
+    "test": "tape test/*.js"
   },
   "repository": {
     "type": "git",
@@ -27,5 +27,8 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jarofghosts/ziggy/issues"
+  },
+  "devDependencies": {
+    "tape": "^2.12.3"
   }
 }

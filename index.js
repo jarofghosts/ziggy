@@ -23,6 +23,7 @@ function Ziggy(settings) {
   this.settings.password = settings.password
   this.settings.users = {}
   this.settings.secure = !!settings.secure
+  this.settings.client = settings.client
 
   populate_users(this, settings.users)
 
@@ -55,7 +56,7 @@ Ziggy.prototype.start = function Ziggy$start() {
     , secure: this.settings.secure
   }
 
-  this.client = new irc.Client(
+  this.client = this.settings.client || new irc.Client(
       this.settings.server
     , this.settings.nickname
     , options
