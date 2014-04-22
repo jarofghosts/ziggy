@@ -39,6 +39,7 @@ Ziggy.prototype.activatePlugins = function Ziggy$activatePlugins() {
 
 Ziggy.prototype.deactivatePlugins = function Ziggy$deactivatePlugins() {
   this.removeAllListeners()
+  require.cache = {}
 }
 
 Ziggy.prototype.start = function Ziggy$start() {
