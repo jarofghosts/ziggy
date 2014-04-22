@@ -21,11 +21,10 @@ function Ziggy(settings) {
   this.settings.nickname = settings.nickname || 'Ziggy'
   this.settings.plugins = settings.plugins || []
   this.settings.password = settings.password
-  this.settings.users = {}
   this.settings.secure = !!settings.secure
   this.settings.client = settings.client
 
-  populate_users(this, settings.users)
+  this.settings.users = populate_users(settings.users)
 
   return this
 }

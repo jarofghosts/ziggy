@@ -19,8 +19,13 @@ test('emits ready when client is registered', function(t) {
   client.emit('registered')
 })
 
-test('adds users on names event, updates on nick', function(t) {
-  t.plan(2)
+test(
+    'adds users on names event, updates on nick, removes on part'
+  , channel_user_test
+)
+
+function channel_user_test(t) {
+  t.plan(3)
 
   var client = new EE()
 
@@ -37,6 +42,7 @@ test('adds users on names event, updates on nick', function(t) {
           , info: {userLevel: 0, authenticated: false}
         }
       }
+    , 'adds user with channel level'
   )
 
   client.emit('nick', 'derp', 'merp', ['#herp'])
@@ -50,5 +56,33 @@ test('adds users on names event, updates on nick', function(t) {
           , info: {userLevel: 0, authenticated: false}
         }
       }
+    , 'updates user key and nick'
+  )
+
+  client.emit('part', '#herp', 'merp')
+
+  t.deepEqual(ziggy.settings.channels['#herp'].users, {}, 'removes user')
+}
+
+test('adds user on join event', function(t) {
+  t.plan(1)
+
+  var client = new EE()
+
+  var ziggy = new Ziggy({client: client})
+  ziggy.start()
+
+  client.emit('join', '#herp', 'derp')
+
+  t.deepEqual(
+      ziggy.settings.channels['#herp'].users
+    , {
+        derp: {
+            nick: 'derp'
+          , level: ''
+          , info: {userLevel: 0, authenticated: false}
+        }
+      }
+    , 'adds user with blank channel level'
   )
 })
