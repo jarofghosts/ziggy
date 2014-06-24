@@ -1,5 +1,4 @@
-var inherits = require('util').inherits
-  , EE = require('events').EventEmitter
+var EE = require('events').EventEmitter
 
 var extend = require('xtend')
   , irc = require('irc')
@@ -12,6 +11,8 @@ module.exports.createZiggy = createZiggy
 
 function Ziggy(settings) {
   if(!(this instanceof Ziggy)) return new Ziggy(settings)
+
+  EE.call(this)
 
   this.settings = {}
 
@@ -29,7 +30,7 @@ function Ziggy(settings) {
   return this
 }
 
-inherits(Ziggy, EE)
+Ziggy.prototype = Object.create(EE.prototype)
 
 Ziggy.prototype.activatePlugins = function Ziggy$activatePlugins() {
   for(var i = 0, l = this.settings.plugins.length; i < l; ++i) {

@@ -69,6 +69,8 @@ options.plugin.forEach(setup_plugin)
 
 new Ziggy(options).start()
 
+process.on('uncaughtException', log_error)
+
 function help() {
   version()
   fs.createReadStream(path.resolve(__dirname, '..', 'help.txt'))
@@ -104,6 +106,10 @@ function try_require(module) {
   } catch(e) {
     return null
   }
+}
+
+function log_error(err) {
+  console.error(err)
 }
 
 function noop() {}
