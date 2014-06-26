@@ -196,7 +196,10 @@ Ziggy.prototype.deop = function Ziggy$deop(channel, nick) {
 }
 
 Ziggy.prototype.register = function Ziggy$register(users) {
-  return populate_users(this, users)
+  this.settings.users =  extend(
+      this.settings.users
+    , populate_users(this, users)
+  )
 }
 
 Ziggy.prototype.update = function Ziggy$update(user_objects) {
