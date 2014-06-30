@@ -20,6 +20,8 @@ function Ziggy(settings) {
   this.settings.port = settings.port || 6667
   this.settings.channels = settings.channels || []
   this.settings.nickname = settings.nickname || 'Ziggy'
+  this.settings.username = settings.username || 'ziggy'
+  this.settings.realName = settings.realName || 'Ziggy'
   this.settings.plugins = settings.plugins || []
   this.settings.password = settings.password
   this.settings.secure = !!settings.secure
@@ -48,8 +50,8 @@ Ziggy.prototype.start = function Ziggy$start() {
 
   var options = {
       channels: this.settings.channels
-    , userName: 'ziggy'
-    , realName: 'Ziggy'
+    , userName: this.settings.username
+    , realName: this.settings.realName
     , password: this.settings.password
     , thisSigned: true
     , certExpired: true
