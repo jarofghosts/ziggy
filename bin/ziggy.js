@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
-var Ziggy = require('../').Ziggy
-  , nopt = require('nopt')
-  , path = require('path')
+var path = require('path')
   , fs = require('fs')
+
+var nopt = require('nopt')
+
+var Ziggy = require('../')
 
 var noptions = {
     plugin: Array

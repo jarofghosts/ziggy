@@ -6,8 +6,7 @@ var extend = require('xtend')
 var attach_listeners = require('./lib/attach-listeners')
   , populate_users = require('./lib/populate-users')
 
-module.exports.Ziggy = Ziggy
-module.exports.createZiggy = createZiggy
+module.exports = createZiggy
 
 function Ziggy(settings) {
   if(!(this instanceof Ziggy)) return new Ziggy(settings)
@@ -35,8 +34,12 @@ function Ziggy(settings) {
 Ziggy.prototype = Object.create(EE.prototype)
 
 Ziggy.prototype.activatePlugins = function Ziggy$activatePlugins() {
+  var plugin
+
   for(var i = 0, l = this.settings.plugins.length; i < l; ++i) {
-    this.settings.plugins[i].setup(this)
+    plugin = this.settings.plugins[i]
+
+    plugin.setup(this, plugin.settings)
   }
 }
 
@@ -233,6 +236,5 @@ Ziggy.prototype.unregister = function Ziggy$unregister(users) {
 function createZiggy(options) {
   return new Ziggy(options)
 }
-
 
 function noop() {}

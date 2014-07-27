@@ -8,8 +8,8 @@ an irc bot in node
 ## usage
 
 ```js
-var Ziggy = require('ziggy').Ziggy
-  , ziggy = new Ziggy({
+var Ziggy = require('ziggy')
+  , ziggy = Ziggy({
         server: 'irc.freenode.net'
       , nickname: 'Gushie'
       , channels: ['#quantumleap', '#sliderssucks']
@@ -26,23 +26,26 @@ it!
 ## example plugin
 
 ```js
-module.exports = function(ziggy) {
-
-  ziggy.on('pm', function(user, text) {
-    ziggy.say(user.nick, 'Speak up, I can\'t hear you.')
-  })
+module.exports = function(ziggy, settings) {
+  if(settings.respondToPm) {
+    ziggy.on('pm', function(user, text) {
+      ziggy.say(user.nick, 'Speak up, I can\'t hear you.')
+    })
+  }
 
   ziggy.on('message', function(user, channel, text) {
     var bits = text.split(' ')
       , command = bits.shift()
 
-    if (command === '!reverse') {
+    if(command === '!reverse') {
       ziggy.say(channel, bits.reverse().join(' '))
     }
-    if (command === '!upper') {
+
+    if(command === '!upper') {
       ziggy.say(channel, bits.join(' ').toUpperCase())
     }
-    if (command === '!lower') {
+
+    if(command === '!lower') {
       ziggy.say(channel, bits.join(' ').toLowerCase())
     }
   })
@@ -53,21 +56,27 @@ Save something like that as, say, dumb-plugin.js and then modify your main code
 a bit.
 
 ```js
-var Ziggy = require('ziggy').Ziggy
-  , dumbPlugin = require('dumb-plugin.js')
-  , ziggy = new Ziggy({
+var Ziggy = require('ziggy')
+
+var dumbPlugin = require('dumb-plugin.js')
+  , ziggy = Ziggy({
         server: 'irc.freenode.org'
       , nickname: 'Gushie'
-      , plugins: [{name: 'dumb plugin', setup: dumbPlugin}]
+      , plugins: [{
+            name: 'dumb plugin'
+          , setup: dumbPlugin
+          , settings: {respondToPm: true}
+        }]
       , channels: ['#quantumleap', '#sliderssucks']
     })
 
 ziggy.start()
 ```
 
-Now we're talkin'. Pretty self-explanatory, but it will respond to all private
-messages with "Speak up, I can't hear you." as well as responding to in-channel
-"commands" like !reverse, !upper, and !lower with the replies associated.
+Now we're talkin'. Pretty self-explanatory, but if you configure it as such, it
+will respond to all private messages with "Speak up, I can't hear you."
+It will also respond to in-channel "commands" like !reverse, !upper, and !lower
+with the replies associated.
 
 Better yet, you can look at a fully-functioning example plugin
 [here](https://github.com/jarofghosts/ziggy-example-plugin).
@@ -85,7 +94,7 @@ options are:
 * `--port, -P <port>` Server port (default 6667)
 * `--password <password>` Server password
 * `--secure, -S` Use secure connection
-* `--plugin, -p <filemodule>`| Use ziggy plugin module
+* `--plugin, -p <filemodule>` Use ziggy plugin module
 * `--nickname, -n <nick>` Set nickname (default ziggy)
 * `--channel, -c <channel>` Connect to channel on startup
 * `--user, -u <name:pass>` Add users for Ziggy

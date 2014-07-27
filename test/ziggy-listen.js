@@ -2,14 +2,14 @@ var EE = require('events').EventEmitter
 
 var test = require('tape')
 
-var Ziggy = require('../').Ziggy
+var Ziggy = require('../')
 
 test('emits ready when client is registered', function(t) {
   t.plan(1)
 
   var client = new EE()
 
-  var ziggy = new Ziggy({client: client})
+  var ziggy = Ziggy({client: client})
   ziggy.start()
 
   ziggy.on('ready', function() {
@@ -29,7 +29,7 @@ function channel_user_test(t) {
 
   var client = new EE()
 
-  var ziggy = new Ziggy({client: client})
+  var ziggy = Ziggy({client: client})
   ziggy.start()
 
   client.emit('names', '#herp', {'derp': '+'})
@@ -69,7 +69,7 @@ test('adds user on join event', function(t) {
 
   var client = new EE()
 
-  var ziggy = new Ziggy({client: client})
+  var ziggy = Ziggy({client: client})
   ziggy.start()
 
   client.emit('join', '#herp', 'derp')
