@@ -13,6 +13,8 @@ function Ziggy(settings) {
 
   EE.call(this)
 
+  this.setMaxListeners(0)
+
   this.settings = {}
 
   this.settings.server = settings.server || 'irc.freenode.net'
