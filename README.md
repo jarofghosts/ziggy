@@ -139,7 +139,7 @@ when a person parts a channel
 ### `ziggypart (channel)`
 when ziggy parts a channel
 
-### `quit (user, reason)`
+### `quit (user, reason, channels)`
 when a user quits IRC
 
 ### `kick (kicked, kickedBy, channel, reason)`
