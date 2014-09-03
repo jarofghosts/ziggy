@@ -127,6 +127,9 @@ when a person changes their nickname
 ### `authed (user)`
 when a Ziggy user authenticates his or herself.
 
+### `action (user, channel, text)`
+when an action is sent in a channel
+
 ### `mode (channel, setBy, mode, argument)`
 when a mode is set
 
