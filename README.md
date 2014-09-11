@@ -130,6 +130,12 @@ when a Ziggy user authenticates his or herself.
 ### `action (user, channel, text)`
 when an action is sent in a channel
 
+### `server (text)`
+when a notice is recieved from server
+
+### `notice (user, to, text)`
+when a notice is recieved. note: 'to' can be a nickname or a channel
+
 ### `mode (channel, setBy, mode, argument)`
 when a mode is set
 
