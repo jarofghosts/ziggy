@@ -218,6 +218,9 @@ add users to the registered users list- accepts an object in the same format as
 ### `action(channel, text)`
 send an irc action of `text` to `channel`
 
+### `notice(target, text)`
+send a notice to a nick or channel
+
 ### `update(userObject)`
 update user properties for users in object, same format as `users` in the
 startup.
