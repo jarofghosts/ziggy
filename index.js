@@ -81,6 +81,14 @@ Ziggy.prototype.action = function Ziggy$action(channel, message) {
   return this.client.action(channel, message)
 }
 
+Ziggy.prototype.notice = function Ziggy$notice(target, message) {
+  return this.client.notice(target, message)
+}
+
+Ziggy.prototype.invite = function Ziggy$invite(nickname, channel) {
+  this.client.send('INVITE', nickname, channel)
+}
+
 Ziggy.prototype.topic = function Ziggy$topic(channel, topic) {
   this.client.send('TOPIC', channel, topic)
 }
