@@ -131,10 +131,10 @@ when a Ziggy user authenticates his or herself.
 when an action is sent in a channel
 
 ### `server (text)`
-when a notice is recieved from server
+when a notice is received from server
 
 ### `notice (user, to, text)`
-when a notice is recieved. note: 'to' can be a nickname or a channel
+when a notice is received. note: 'to' can be a nickname or a channel
 
 ### `mode (channel, setBy, mode, argument)`
 when a mode is set
@@ -223,9 +223,9 @@ send a notice to a nick or channel
 
 ### `invite(nick, channel)`
 send a channel invitation to nick. 
-`channel` does not have to exist, but if it does, only users in the `channel` are 
-allowed to invite other users. If the channel mode i is set, only channel operators 
-may invite other users.
+`channel` does not have to exist, but if it does, only users in the `channel`
+are allowed to invite other users. If the channel mode `+i` is set, only
+channel operators may invite other users.
 
 ### `update(userObject)`
 update user properties for users in object, same format as `users` in the
