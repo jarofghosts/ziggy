@@ -222,7 +222,7 @@ send an irc action of `text` to `channel`
 send a notice to a nick or channel
 
 ### `invite(nick, channel)`
-send a channel invitation to nick 
+send a channel invitation to nick. 
 `channel` does not have to exist, but if it does, only users in the `channel` are 
 allowed to invite other users. If the channel mode i is set, only channel operators 
 may invite other users.
