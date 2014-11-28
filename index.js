@@ -9,8 +9,6 @@ var attach_listeners = require('./lib/attach-listeners')
 module.exports = createZiggy
 
 function Ziggy(settings) {
-  if(!(this instanceof Ziggy)) return new Ziggy(settings)
-
   EE.call(this)
 
   this.setMaxListeners(0)
