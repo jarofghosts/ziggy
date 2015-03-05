@@ -3,8 +3,8 @@ var EE = require('events').EventEmitter
 var extend = require('xtend')
   , irc = require('irc')
 
-var attach_listeners = require('./lib/attach-listeners')
-  , populate_users = require('./lib/populate-users')
+var attachListeners = require('./lib/attach-listeners')
+  , populateUsers = require('./lib/populate-users')
 
 module.exports = createZiggy
 
@@ -26,7 +26,9 @@ function Ziggy(settings) {
   this.settings.secure = !!settings.secure
   this.settings.client = settings.client
 
-  this.settings.users = populate_users(settings.users)
+  this.settings.users = populateUsers(settings.users)
+
+  this.started = Date.now()
 
   return this
 }
@@ -68,7 +70,7 @@ Ziggy.prototype.start = function Ziggy$start() {
     , options
   )
 
-  attach_listeners(this)
+  attachListeners(this)
 }
 
 Ziggy.prototype.say = function Ziggy$say(target, text) {
@@ -163,26 +165,26 @@ Ziggy.prototype.channel = function Ziggy$channel(channel) {
 
 Ziggy.prototype.users = function Ziggy$users(callback) {
   var users = Object.keys(this.settings.users)
-    , user_list = {}
+    , userList = {}
     , user
 
   for(var i = 0, l = users.length; i < l; ++i) {
     user = users[i]
 
-    user_list[user] = this.settings.users[user].shared
+    userList[user] = this.settings.users[user].shared
   }
 
-  return user_list
+  return userList
 }
 
 Ziggy.prototype.user = function Ziggy$user(nickname) {
-  var default_user_info = {userLevel: 0, authenticated: false}
-    , user_info = this.settings.users[nickname] ?
-      this.settings.users[nickname].shared : default_user_info
+  var defaultUserInfo = {userLevel: 0, authenticated: false}
+    , userInfo = this.settings.users[nickname] ?
+      this.settings.users[nickname].shared : defaultUserInfo
 
   return {
       nick: nickname
-    , info: user_info
+    , info: userInfo
   }
 }
 
@@ -211,24 +213,24 @@ Ziggy.prototype.deop = function Ziggy$deop(channel, nick) {
 Ziggy.prototype.register = function Ziggy$register(users) {
   this.settings.users =  extend(
       this.settings.users
-    , populate_users(this, users)
+    , populateUsers(this, users)
   )
 }
 
-Ziggy.prototype.update = function Ziggy$update(user_objects) {
-  var users = Object.keys(user_objects)
+Ziggy.prototype.update = function Ziggy$update(userObjects) {
+  var users = Object.keys(userObjects)
     , user
 
   for(i = 0, l = users.length; i < l; ++i) {
     user = users[i]
 
     if(!this.settings.users[user]) {
-      this.settings.users[user] = user_objects[user]
+      this.settings.users[user] = userObjects[user]
     }
 
     this.settings.users[user] = extend(
         this.settings.users[user]
-      , user_objects[user]
+      , userObjects[user]
     )
   }
 }
