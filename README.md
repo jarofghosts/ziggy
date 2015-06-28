@@ -1,7 +1,7 @@
-ziggy
-====
+# ziggy
 
-[![Build Status](https://travis-ci.org/jarofghosts/ziggy.svg?branch=master)](https://travis-ci.org/jarofghosts/ziggy)
+[![Build Status](http://img.shields.io/travis/jarofghosts/ziggy.svg?style=flat)](https://travis-ci.org/jarofghosts/ziggy)
+[![npm install](http://img.shields.io/npm/dm/ziggy.svg?style=flat)](https://www.npmjs.org/package/ziggy)
 
 an irc bot in node
 
@@ -222,7 +222,7 @@ send an irc action of `text` to `channel`
 send a notice to a nick or channel
 
 ### `invite(nick, channel)`
-send a channel invitation to nick. 
+send a channel invitation to nick.
 `channel` does not have to exist, but if it does, only users in the `channel`
 are allowed to invite other users. If the channel mode `+i` is set, only
 channel operators may invite other users.
